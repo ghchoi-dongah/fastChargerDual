@@ -232,4 +232,11 @@ public class ZonedDateTimeConvert {
         return null;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String doGetUtcDatetimeAsStringSimple() {
+        @SuppressLint("SimpleDateFormat") final SimpleDateFormat sdf = new SimpleDateFormat(ZONED_DATE_TIME_FORMAT);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(new Date());
+    }
+
 }

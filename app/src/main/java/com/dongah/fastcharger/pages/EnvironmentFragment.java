@@ -42,7 +42,7 @@ public class EnvironmentFragment extends Fragment implements View.OnClickListene
     private String mParam2;
     private int mChannel;
 
-    Button btnConfig, btnWebSocket, btnControl, btnUi, btnMember, btnExit;
+    Button btnConfig, btnWebSocket, btnControl, btnUi, btnMember, btnExit, btnLoadTest;
 
     SharedModel sharedModel ;
     String[] requestStrings = new String[1];
@@ -82,19 +82,20 @@ public class EnvironmentFragment extends Fragment implements View.OnClickListene
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_environment, container, false);
         btnConfig = view.findViewById(R.id.btnConfig);
-        btnWebSocket = view.findViewById(R.id.btnWebSocket);
-        btnControl = view.findViewById(R.id.btnControl);
-        btnUi = view.findViewById(R.id.btnUi);
-        btnMember = view.findViewById(R.id.btnMember);
-        btnExit = view.findViewById(R.id.btnExit);
         btnConfig.setOnClickListener(this);
+        btnWebSocket = view.findViewById(R.id.btnWebSocket);
         btnWebSocket.setOnClickListener(this);
+        btnControl = view.findViewById(R.id.btnControl);
         btnControl.setOnClickListener(this);
+        btnLoadTest = view.findViewById(R.id.btnLoadTest);
+        btnLoadTest.setOnClickListener(this);
+        btnUi = view.findViewById(R.id.btnUi);
         btnUi.setOnClickListener(this);
+        btnMember = view.findViewById(R.id.btnMember);
         btnMember.setOnClickListener(this);
+        btnExit = view.findViewById(R.id.btnExit);
         btnExit.setOnClickListener(this);
         sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
         return view;
@@ -115,7 +116,7 @@ public class EnvironmentFragment extends Fragment implements View.OnClickListene
             switch (uiSeq) {
                 case CHARGING:
                     ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CHARGING);
-                    ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "full");
+                    ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
                     break;
                 case FAULT:
                     ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.FAULT);
@@ -132,6 +133,8 @@ public class EnvironmentFragment extends Fragment implements View.OnClickListene
         } else if (Objects.equals(getId, R.id.btnExit)) {
             ActivityCompat.finishAffinity((MainActivity) MainActivity.mContext);
             System.exit(0);
+        } else if (Objects.equals(getId, R.id.btnLoadTest)) {
+            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.LOAD_TEST, "LOAD_TEST", null);
         }
     }
 }

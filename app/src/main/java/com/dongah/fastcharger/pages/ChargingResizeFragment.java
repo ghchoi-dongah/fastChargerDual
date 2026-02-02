@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +29,7 @@ import com.dongah.fastcharger.basefunction.UiSeq;
 import com.dongah.fastcharger.utils.FileManagement;
 import com.dongah.fastcharger.utils.SharedModel;
 import com.dongah.fastcharger.websocket.ocpp.utilities.ZonedDateTimeConvert;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +59,10 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
     private String mParam2;
     private int mChannel;
 
-    TextView txtChargePay, txtChargeTime, txtAmountOfCharge, textViewInputPrePayment;
-    TextView txtRemainTime, txtSoc,textViewInputUnit;
+    TextView txtChargePay, txtChargeTime, txtAmountOfCharge, textViewInputPrePayment, textViewRequestCurrentValue;
+    TextView txtRemainTime, txtSoc, textViewInputUnit, textViewLimitSoc;
+    TextView textViewPrePayment;
+    CircularProgressIndicator progressCircular;
     Button  btnChargingStop;
     TextView txtOutVoltage, txtOutCurrent, txtOutPower;
     Handler uiUpdateHandler;
@@ -111,7 +115,6 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_charging_resize, container, false);
         txtChargePay = view.findViewById(R.id.txtChargePay);
         txtChargeTime = view.findViewById(R.id.txtChargeTime);
@@ -124,9 +127,55 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
         btnChargingStop.setOnClickListener(this);
         txtSoc = view.findViewById(R.id.txtSoc);
         textViewInputUnit = view.findViewById(R.id.textViewInputUnit);
-        textViewInputPrePayment= view.findViewById(R.id.textViewInputPrePayment);
+        textViewPrePayment = view.findViewById(R.id.textViewPrePayment);
+        textViewInputPrePayment = view.findViewById(R.id.textViewInputPrePayment);
+        textViewRequestCurrentValue = view.findViewById(R.id.textViewRequestCurrentValue);
+        textViewLimitSoc = view.findViewById(R.id.textViewLimitSoc);
+        progressCircular = view.findViewById(R.id.progressCircular);
+        chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
+        return view;
+    }
 
-        return view;    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        try {
+
+            MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.charging);
+            mediaPlayer.setOnCompletionListener(MediaPlayer::release);
+            mediaPlayer.start();
+
+            progressCircular.isIndeterminate();
+            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
+            requestStrings[0] = String.valueOf(mChannel);
+            sharedModel.setMutableLiveData(requestStrings);
+
+            if (Objects.equals(chargingCurrentData.getPaymentType(), PaymentType.CREDIT)) {
+                textViewPrePayment.setVisibility(View.VISIBLE);
+                textViewInputPrePayment.setVisibility(View.VISIBLE);
+            } else {
+                textViewPrePayment.setVisibility(View.INVISIBLE);
+                textViewInputPrePayment.setVisibility(View.INVISIBLE);
+            }
+
+            try {
+                classUiProcess = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel);
+                startTime = zonedDateTimeConvert.doStringDateToDate(chargingCurrentData.getChargingStartTime());
+                powerUnitPrice = chargingCurrentData.getPowerUnitPrice();
+                textViewInputUnit.setText(String.valueOf(powerUnitPrice) + " 원");
+                textViewInputPrePayment.setText(chargingCurrentData.getPrePayment() + " 원");
+                textViewLimitSoc.setText(getString(R.string.limitSoc) + ((MainActivity) MainActivity.mContext).getChargerConfiguration().getTargetSoc() + "%");
+                progressCircular.setProgress(((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel).getSoc(), true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            onCharging();
+        } catch (Exception e) {
+            logger.error("ChargingFragment onViewCreated : {}", e.getMessage());
+        }
+    }
 
     @Override
     public void onClick(View v) {
@@ -153,51 +202,6 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
             }
         }
     }
-    @SuppressLint("SetTextI18n")
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        try {
-
-            MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.charging);
-            mediaPlayer.setOnCompletionListener(MediaPlayer::release);
-            mediaPlayer.start();
-            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
-            try {
-                classUiProcess = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel);
-                chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
-                startTime = zonedDateTimeConvert.doStringDateToDate(chargingCurrentData.getChargingStartTime());
-                powerUnitPrice = chargingCurrentData.getPowerUnitPrice();
-                textViewInputUnit.setText(String.valueOf(powerUnitPrice) + " 원");
-                textViewInputPrePayment.setText(String.valueOf(chargingCurrentData.getPrePayment()) + " 원");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            onCharging();
-
-        } catch (Exception e) {
-            logger.error("ChargingFragment onViewCreated : {}", e.getMessage());
-        }
-    }
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        try {
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
-            uiUpdateHandler.removeCallbacksAndMessages(null);
-            uiUpdateHandler.removeMessages(0);
-            //display handler
-            displayHandler.removeCallbacksAndMessages(null);
-            displayHandler.removeMessages(0);
-            if (uiUpdateHandler != null) uiUpdateHandler = null;
-        } catch (Exception e) {
-            logger.error("ChargingFragment onDetach : {}", e.getMessage());
-        }
-    }
-
 
 //    FileManagement fileManagement = new FileManagement();
 //    int saveCnt = 0 ;
@@ -235,10 +239,12 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
                                 chargingCurrentData.setRemainTimeStr(String.format("%02d", rHour)+String.format("%02d", rMinute)+String.format("%02d", rSecond));
 
                                 txtSoc.setText(chargingCurrentData.getSoc() + "%");
+                                progressCircular.setProgress(chargingCurrentData.getSoc(), true);
 
                                 txtOutVoltage.setText(voltageFormatter.format(chargingCurrentData.getOutPutVoltage() * 0.1) + " V");
                                 txtOutCurrent.setText(powerFormatter.format(chargingCurrentData.getOutPutCurrent() * 0.1) + " A");
                                 txtOutPower.setText(powerFormatter.format(chargingCurrentData.getOutPutVoltage() * chargingCurrentData.getOutPutCurrent() * 0.00001) + " kW");
+                                textViewRequestCurrentValue.setText(powerFormatter.format(((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel).getTargetCurrent() * 0.1) + "A");
 
 //
 //                                //log data
@@ -267,6 +273,20 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
         }, 50);
     }
 
-
-
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        try {
+            requestStrings[0] = String.valueOf(mChannel);
+            sharedModel.setMutableLiveData(requestStrings);
+            uiUpdateHandler.removeCallbacksAndMessages(null);
+            uiUpdateHandler.removeMessages(0);
+            //display handler
+            displayHandler.removeCallbacksAndMessages(null);
+            displayHandler.removeMessages(0);
+            if (uiUpdateHandler != null) uiUpdateHandler = null;
+        } catch (Exception e) {
+            logger.error("ChargingFragment onDetach : {}", e.getMessage());
+        }
+    }
 }

@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.dongah.fastcharger.MainActivity;
@@ -21,11 +22,13 @@ import com.dongah.fastcharger.basefunction.ChargerConfiguration;
 import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.ClassUiProcess;
 import com.dongah.fastcharger.basefunction.GlobalVariables;
+import com.dongah.fastcharger.basefunction.PaymentType;
 import com.dongah.fastcharger.controlboard.RxData;
 import com.dongah.fastcharger.handler.ProcessHandler;
 import com.dongah.fastcharger.websocket.ocpp.core.ChargePointStatus;
 import com.dongah.fastcharger.websocket.socket.SocketReceiveMessage;
 import com.dongah.fastcharger.websocket.socket.SocketState;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +57,8 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
     private int mChannel;
 
     Button btnStopConfirm;
-
+    CircularProgressIndicator progressCircular;
+    CardView cardViewPayment;
     TextView  txtSoc, txtAmountOfCharge, txtChargePay, txtChargeTime, textViewInputPrePayment, textViewInputCancelPayment;
     ClassUiProcess classUiProcess;
     ChargingCurrentData chargingCurrentData;
@@ -102,9 +106,7 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_charging_finish_resize, container, false);
-
         txtSoc = view.findViewById(R.id.txtSoc);
         txtAmountOfCharge = view.findViewById(R.id.txtAmountOfCharge);
         txtChargePay = view.findViewById(R.id.txtChargePay);
@@ -116,7 +118,8 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
         classUiProcess = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel);
         chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
         textViewInputPrePayment.setText(String.valueOf(chargingCurrentData.getPrePayment()) + " 원");
-
+        progressCircular = view.findViewById(R.id.progressCircular);
+        cardViewPayment = view.findViewById(R.id.cardView2);
         return view;
 
     }
@@ -126,6 +129,12 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
         super.onViewCreated(view, savedInstanceState);
         //charging finish info
         try {
+            if (Objects.equals(chargingCurrentData.getPaymentType(), PaymentType.CREDIT)) {
+                cardViewPayment.setVisibility(View.VISIBLE);
+            } else {
+                cardViewPayment.setVisibility(View.INVISIBLE);
+            }
+            progressCircular.isIndeterminate();
 
             MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.chargingfinsih);
             mediaPlayer.setOnCompletionListener(MediaPlayer::release);
@@ -152,6 +161,8 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
                     realPay = (int) chargingCurrentData.getPowerMeterUsePay();
                     txtChargePay.setText(payFormatter.format(realPay) + " 원");
                     txtChargeTime.setText(chargingCurrentData.getChargingUseTime());
+                    progressCircular.setProgress(chargingCurrentData.getSoc(), true);
+
                     try {
                         //result price
                         ChargerConfiguration chargerConfiguration = ((MainActivity) MainActivity.mContext).getChargerConfiguration();
@@ -219,7 +230,7 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
                             chargingCurrentData.setPartialCancelPayment(gapAmt);
                             chargingCurrentData.setSurtax(surTax);
                             chargingCurrentData.setTip(0);
-                            textViewInputCancelPayment.setText(String.valueOf(gapAmt) + " 원");
+                            textViewInputCancelPayment.setText("-" + String.valueOf(gapAmt) + " 원");
                             SocketReceiveMessage socketReceiveMessage = ((MainActivity) MainActivity.mContext).getSocketReceiveMessage();
                             ProcessHandler processHandler = ((MainActivity) MainActivity.mContext).getProcessHandler();
                             processHandler.sendMessage(

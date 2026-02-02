@@ -22,11 +22,13 @@ import com.dongah.fastcharger.pages.CreditCardWaitFragment;
 import com.dongah.fastcharger.pages.EnvironmentFragment;
 import com.dongah.fastcharger.pages.FaultFragment;
 import com.dongah.fastcharger.pages.HeaderFragment;
+import com.dongah.fastcharger.pages.InitFragment;
 import com.dongah.fastcharger.pages.LeftInitFragment;
 import com.dongah.fastcharger.pages.MemberCardFragment;
 import com.dongah.fastcharger.pages.MemberCardWaitFragment;
 import com.dongah.fastcharger.pages.MessageYesNoFragment;
 import com.dongah.fastcharger.pages.PlugWaitFragment;
+import com.dongah.fastcharger.pages.ProductTestFragment;
 import com.dongah.fastcharger.pages.QrFragment;
 import com.dongah.fastcharger.pages.RightInitFragment;
 import com.dongah.fastcharger.pages.SocFragment;
@@ -54,27 +56,32 @@ public class FragmentChange {
         int frameLayoutId = channel == 0 ? R.id.ch0 : R.id.ch1;
         // full = 1024x696,  small = 512x696
         FragmentTransaction transaction = ((MainActivity) MainActivity.mContext).getSupportFragmentManager().beginTransaction();
+        onAdminLayoutChange(uiSeq);
         switch (uiSeq) {
             case INIT:
                 try {
-//                    onFrameLayoutChange(false);
-//                    InitFragment initFragment =  new InitFragment();
-//                    transaction.replace(frameLayoutId, initFragment, sendText);
-//                    initFragment.setArguments(bundle);
-//                    transaction.commit();
                     onFrameLayoutChange(false);
-                    if (channel == 0){
-                        bundle.putInt("CHANNEL", 0);
-                        LeftInitFragment leftInitFragment = new LeftInitFragment();
-                        transaction.replace(frameLayoutId, leftInitFragment, sendText);
-                        leftInitFragment.setArguments(bundle);
-                    } else {
-                        bundle.putInt("CHANNEL", 1);
-                        RightInitFragment rightInitFragment = new RightInitFragment();
-                        transaction.replace(frameLayoutId, rightInitFragment, sendText);
-                        rightInitFragment.setArguments(bundle);
-                    }
+                    bundle.putInt("CHANNEL", channel == 0 ? 0 : 1);
+                    InitFragment initFragment =  new InitFragment();
+                    transaction.replace(frameLayoutId, initFragment, sendText);
+                    initFragment.setArguments(bundle);
                     transaction.commit();
+//                    onFrameLayoutChange(false);
+//                    if (channel == 0){
+//                        bundle.putInt("CHANNEL", 0);
+//                        LeftInitFragment leftInitFragment = new LeftInitFragment();
+//                        transaction.replace(frameLayoutId, leftInitFragment, sendText);
+//                        leftInitFragment.setArguments(bundle);
+//                    } else {
+//                        bundle.putInt("CHANNEL", 1);
+//                        RightInitFragment rightInitFragment = new RightInitFragment();
+//                        transaction.replace(frameLayoutId, rightInitFragment, sendText);
+//                        rightInitFragment.setArguments(bundle);
+//                    }
+//                    InitFragment initFragment = new InitFragment();
+//                    initFragment.setArguments(bundle);
+//                    transaction.replace(frameLayoutId, initFragment, sendText);
+//                    transaction.commit();
                 } catch (Exception e) {
                     logger.error("onFragmentChange error : INIT {}", e.getMessage());
                 }
@@ -204,6 +211,7 @@ public class FragmentChange {
                 break;
             case QR_CODE:
                 try {
+                    onFrameLayoutChange(false);
                     QrFragment qrFragment = new QrFragment();
                     transaction.replace(frameLayoutId, qrFragment, "QR_CODE");
                     qrFragment.setArguments(bundle);
@@ -298,8 +306,19 @@ public class FragmentChange {
                     logger.error("onFragmentChange error : controlDebugFragment {}", e.getMessage());
                 }
                 break;
+            case LOAD_TEST:
+                try {
+                    onFrameLayoutChange(true);
+                    frameLayoutId = R.id.fullScreen;
+                    ProductTestFragment productTestFragment = new ProductTestFragment();
+                    productTestFragment.setArguments(bundle);
+                    transaction.replace(frameLayoutId, productTestFragment, "LOAD_TEST");
+                    transaction.commit();
+                } catch (Exception e) {
+                    logger.error("onFragmentChange error : productTestFragment {}", e.getMessage());
+                }
+                break;
         }
-
     }
 
 
@@ -322,6 +341,30 @@ public class FragmentChange {
             }
         } catch (Exception e) {
             logger.error("onFrameLayoutChange error : {}", e.getMessage());
+        }
+    }
+
+    public void onAdminLayoutChange(UiSeq uiSeq) {
+        try {
+            FrameLayout frameHeader = ((MainActivity) MainActivity.mContext).findViewById(R.id.header);
+            FrameLayout frameFooter = ((MainActivity) MainActivity.mContext).findViewById(R.id.frameFooter);
+
+            switch (uiSeq) {
+                case ADMIN_PASS:
+                case ENVIRONMENT:
+                case CONFIG_SETTING:
+                case WEB_SOCKET:
+                case CONTROL_BOARD_DEBUGGING:
+                    frameHeader.setVisibility(View.INVISIBLE);
+                    frameFooter.setVisibility(View.INVISIBLE);
+                    break;
+                default:
+                    frameHeader.setVisibility(View.VISIBLE);
+                    frameFooter.setVisibility(View.VISIBLE);
+                    break;
+            }
+        } catch (Exception e) {
+            logger.error("onAdminLayoutChange error : {}", e.getMessage());
         }
     }
 

@@ -265,7 +265,7 @@ public class ProcessHandler extends Handler {
                         LogDataSave logDataSave = new LogDataSave("dump");
                         logDataSave.makeDump(call.toString());
                         //화면을 전환
-                        ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(connectorId - 1, UiSeq.CHARGING, "CHARGING", "full");
+                        ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(connectorId - 1, UiSeq.CHARGING, "CHARGING", "small");
                         //Meter value start
                         if (GlobalVariables.getMeterValueSampleInterval() > 0) {
                             ((MainActivity) MainActivity.mContext).getClassUiProcess(connectorId - 1).onMeterValueStart(connectorId, GlobalVariables.getMeterValueSampleInterval());

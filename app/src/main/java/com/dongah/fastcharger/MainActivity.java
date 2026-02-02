@@ -9,6 +9,11 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,6 +62,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,8 +77,7 @@ public class MainActivity extends AppCompatActivity {
     public static Context mContext;
 
 
-    TextView txtVersion, txtFwVersion;
-    TextView textViewChargerId, textViewTime;
+    TextView textViewVersionValue, textViewTime;
     ImageView imgNetwork;
     Runnable runnable;
     Handler handler = new Handler();
@@ -159,6 +164,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -167,10 +175,12 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        hideNavigationBar();
         mContext = this;
 
-        textViewChargerId = findViewById(R.id.textViewChargerId);
         imgNetwork = findViewById(R.id.imgNetwork);
+        textViewTime = findViewById(R.id.textViewTime);
+        textViewVersionValue = findViewById(R.id.textViewVersionValue);
 
         fragmentCurrent = new FragmentCurrent();
 
@@ -183,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         // 1. charger configuration, ConfigurationKey read */
         chargerConfiguration = new ChargerConfiguration();
         chargerConfiguration.onLoadConfiguration();
+        textViewVersionValue.setText("VER-DEVD " + chargerConfiguration.getFirmwareVersion() + " | ");
 
         // 2. fragment change management */
         fragmentChange = new FragmentChange();
@@ -191,14 +202,6 @@ public class MainActivity extends AppCompatActivity {
             fragmentChange.onFragmentChange(i, UiSeq.INIT, "INIT", "");
             fragmentChange.onFragmentHeaderChange(i, "Header");
         }
-
-        txtVersion = findViewById(R.id.txtVersion);
-        txtVersion.setText("Ver : " + GlobalVariables.VERSION);
-        txtFwVersion = findViewById(R.id.txtFwVersion);
-        txtFwVersion.setText("FW Ver : " + GlobalVariables.FW_VERSION);
-
-        textViewTime = findViewById(R.id.textViewTime);
-        textViewChargerId = findViewById(R.id.textViewChargerId);
 
         // 3. Control board
         controlBoard = new ControlBoard(GlobalVariables.maxChannel, chargerConfiguration.getControlCom());
@@ -363,7 +366,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateTime() {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
             String currentTime = sdf.format(new Date());
             textViewTime.setText(currentTime);
         } catch (Exception e){
@@ -429,6 +433,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void hideNavigationBar() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        );
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -482,7 +498,8 @@ public class MainActivity extends AppCompatActivity {
                                 ConnectionListJsonParse connectionListJsonParse = new ConnectionListJsonParse();
                                 connectorList = connectionListJsonParse.parseConnectorList(response);
 
-                                runOnUiThread(() -> textViewChargerId.setText("ID: " + connectorList.get(0).getSearchKey()));
+//                                runOnUiThread(() -> textViewChargerId.setText("ID: " + connectorList.get(0).getSearchKey()));
+                                runOnUiThread(() -> chargerConfiguration.setChargerId(String.valueOf(connectorList.get(0).getSearchKey())));
 
                                 String baseUrl = chargerConfiguration.getServerConnectingString() + "/" + GlobalVariables.getHumaxClientId();
                                 socketReceiveMessage = new SocketReceiveMessage(baseUrl);
@@ -553,6 +570,32 @@ public class MainActivity extends AppCompatActivity {
 
     public List<Connector> getConnectorList() {
         return connectorList;
+    }
+
+    // 키보드 내리기
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        View view = getCurrentFocus();
+
+        if (view != null) {
+            int[] scrcoords = new int[2];
+            view.getLocationOnScreen(scrcoords);
+            float x = ev.getRawX() + view.getLeft() - scrcoords[0];
+            float y = ev.getRawY() + view.getTop() - scrcoords[1];
+
+            if (ev.getAction() == MotionEvent.ACTION_UP &&
+                    (x < view.getLeft() || x >= view.getRight() ||
+                            y < view.getTop() || y > view.getBottom())) {
+
+                // 키보드 내리기
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+                // EditText 포커스 제거
+                view.clearFocus();
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
 }

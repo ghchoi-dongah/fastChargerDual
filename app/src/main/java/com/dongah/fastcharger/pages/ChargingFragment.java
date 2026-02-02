@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -20,9 +21,11 @@ import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.ClassUiProcess;
+import com.dongah.fastcharger.basefunction.PaymentType;
 import com.dongah.fastcharger.basefunction.UiSeq;
 import com.dongah.fastcharger.utils.SharedModel;
 import com.dongah.fastcharger.websocket.ocpp.utilities.ZonedDateTimeConvert;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +54,11 @@ public class ChargingFragment extends Fragment {
     private String mParam2;
     private int mChannel;
 
-    TextView txtChargePay, txtChargeTime, txtAmountOfCharge, textViewInputPrePayment;
-    TextView txtRemainTime, txtSoc, textViewTimer, textViewInputUnit;
+    TextView txtChargePay, txtChargeTime, txtAmountOfCharge, textViewInputPrePayment, textViewRequestCurrentValue;
+    TextView txtRemainTime, txtSoc, textViewTimer, textViewInputUnit, textViewLimitSoc;
     TextView txtOutVoltage, txtOutCurrent, txtOutPower;
+    CircularProgressIndicator progressCircular;
+    CardView cardViewPayment;
     Handler uiUpdateHandler;
     double powerUnitPrice = 0f;
     SharedModel sharedModel;
@@ -64,7 +69,7 @@ public class ChargingFragment extends Fragment {
     DecimalFormat powerFormatter = new DecimalFormat("#,###,##0.00");
     DecimalFormat voltageFormatter = new DecimalFormat("#,###,##0.0");
     ZonedDateTimeConvert zonedDateTimeConvert = new ZonedDateTimeConvert();
-
+    ChargingCurrentData chargingCurrentData;
 
 
     Handler displayHandler;
@@ -104,10 +109,12 @@ public class ChargingFragment extends Fragment {
         }
     }
 
+    @SuppressLint("SetTextI18n")
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @SuppressWarnings("ConstantConditions")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_charging, container, false);
         txtChargePay = view.findViewById(R.id.txtChargePay);
         txtChargeTime = view.findViewById(R.id.txtChargeTime);
@@ -119,9 +126,12 @@ public class ChargingFragment extends Fragment {
         txtSoc = view.findViewById(R.id.txtSoc);
         textViewInputUnit = view.findViewById(R.id.textViewInputUnit);
         textViewInputPrePayment = view.findViewById(R.id.textViewInputPrePayment);
-
         textViewTimer = view.findViewById(R.id.textViewTimer);
-
+        textViewRequestCurrentValue = view.findViewById(R.id.textViewRequestCurrentValue);
+        textViewLimitSoc = view.findViewById(R.id.textViewLimitSoc);
+        progressCircular = view.findViewById(R.id.progressCircular);
+        cardViewPayment = view.findViewById(R.id.cardView3);
+        chargingCurrentData = ((MainActivity) getActivity()).getChargingCurrentData(mChannel);
         return view;
     }
 
@@ -136,9 +146,18 @@ public class ChargingFragment extends Fragment {
             mediaPlayer.setOnCompletionListener(MediaPlayer::release);
             mediaPlayer.start();
 
+            progressCircular.isIndeterminate();
             sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
             requestStrings[0] = String.valueOf(mChannel);
             sharedModel.setMutableLiveData(requestStrings);
+
+            if (Objects.equals(chargingCurrentData.getPaymentType(), PaymentType.CREDIT)) {
+                cardViewPayment.setVisibility(View.VISIBLE);
+            } else {
+                cardViewPayment.setVisibility(View.INVISIBLE);
+            }
+
+
             //display
             ((MainActivity) MainActivity.mContext).runOnUiThread(new Runnable() {
                 @Override
@@ -153,7 +172,7 @@ public class ChargingFragment extends Fragment {
                                     ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CHARGING);
                                     ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel, UiSeq.CHARGING, "UiSeq.CHARGING", "small");
                                 } else {
-                                    textViewTimer.setText(String.valueOf(10 - cnt));
+                                    textViewTimer.setText(String.valueOf(10 - cnt) + getString(R.string.screenChangeMessage));
                                     displayHandler.postDelayed(displayRunnable, 1000);
                                 }
                             } catch (Exception e){
@@ -171,6 +190,8 @@ public class ChargingFragment extends Fragment {
                 powerUnitPrice = chargingCurrentData.getPowerUnitPrice();
                 textViewInputUnit.setText(powerUnitPrice + " 원");
                 textViewInputPrePayment.setText(chargingCurrentData.getPrePayment() + " 원");
+                textViewLimitSoc.setText(getString(R.string.limitSoc) + ((MainActivity) MainActivity.mContext).getChargerConfiguration().getTargetSoc() + "%");
+                progressCircular.setProgress(((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel).getSoc(), true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -179,25 +200,6 @@ public class ChargingFragment extends Fragment {
             logger.error("ChargingFragment onViewCreated : {}", e.getMessage());
         }
     }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        try {
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
-            uiUpdateHandler.removeCallbacksAndMessages(null);
-            uiUpdateHandler.removeMessages(0);
-            if (uiUpdateHandler != null) uiUpdateHandler = null;
-            //display handler
-            displayHandler.removeCallbacksAndMessages(null);
-            displayHandler.removeMessages(0);
-            if (displayHandler != null) displayHandler = null;
-        } catch (Exception e) {
-            logger.error("ChargingFragment onDetach : {}", e.getMessage());
-        }
-    }
-
 
     @SuppressWarnings("ConstantConditions")
     private void onCharging() {
@@ -213,6 +215,10 @@ public class ChargingFragment extends Fragment {
                         try {
                             long diffTime = 0;
                             ChargingCurrentData chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
+                            if (((MainActivity) MainActivity.mContext).getChargerConfiguration().getTargetSoc() <= chargingCurrentData.getSoc()) {
+
+                            }
+
                             useTime = zonedDateTimeConvert.doStringDateToDate(zonedDateTimeConvert.getStringCurrentTimeZone());
                             if (useTime != null) {
                                 diffTime = (useTime.getTime() - startTime.getTime()) / 1000;
@@ -233,9 +239,12 @@ public class ChargingFragment extends Fragment {
                                 txtRemainTime.setText(String.format("%02d", rHour) + ":" + String.format("%02d", rMinute) + ":" + String.format("%02d", rSecond));
 
                                 txtSoc.setText(chargingCurrentData.getSoc() + "%");
+                                progressCircular.setProgress(chargingCurrentData.getSoc(), true);
+
                                 txtOutVoltage.setText(voltageFormatter.format(chargingCurrentData.getOutPutVoltage() * 0.1) + " V");
                                 txtOutCurrent.setText(powerFormatter.format(chargingCurrentData.getOutPutCurrent() * 0.1) + " A");
                                 txtOutPower.setText(powerFormatter.format(chargingCurrentData.getOutPutVoltage() * chargingCurrentData.getOutPutCurrent() * 0.00001) + " kW");
+                                textViewRequestCurrentValue.setText(powerFormatter.format(((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel).getTargetCurrent() * 0.1) + "A");
                             }
                         } catch (Exception e) {
                             logger.error("ChargingFragment onCharging : {}", e.getMessage());
@@ -247,4 +256,21 @@ public class ChargingFragment extends Fragment {
         }, 50);
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        try {
+            requestStrings[0] = String.valueOf(mChannel);
+            sharedModel.setMutableLiveData(requestStrings);
+            uiUpdateHandler.removeCallbacksAndMessages(null);
+            uiUpdateHandler.removeMessages(0);
+            if (uiUpdateHandler != null) uiUpdateHandler = null;
+            //display handler
+            displayHandler.removeCallbacksAndMessages(null);
+            displayHandler.removeMessages(0);
+            if (displayHandler != null) displayHandler = null;
+        } catch (Exception e) {
+            logger.error("ChargingFragment onDetach : {}", e.getMessage());
+        }
+    }
 }

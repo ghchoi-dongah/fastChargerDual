@@ -44,7 +44,7 @@ public class SocFragment extends Fragment implements View.OnClickListener{
     TextView txtSocInput;
     SeekBar seekBar;
     Button btnConfirm;
-    ImageButton imgPlus, imgMinus;
+    Button imgPlus, imgMinus;
     int socValue = 80 ;
 
 
@@ -80,10 +80,10 @@ public class SocFragment extends Fragment implements View.OnClickListener{
         }
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_soc, container, false);
         seekBar = view.findViewById(R.id.seekBar);
         txtSocInput = view.findViewById(R.id.txtSocInput);

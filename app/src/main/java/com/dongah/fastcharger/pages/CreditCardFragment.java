@@ -91,13 +91,13 @@ public class CreditCardFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_credit_card, container, false);
         chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
         amountFormatter = new DecimalFormat("###,##0");
         txtInputAmt = view.findViewById(R.id.txtInputAmt);
         unitPrice = view.findViewById(R.id.txtUnitPrice);
-        unitPrice.setText(String.valueOf(chargingCurrentData.getPowerUnitPrice()));
+        String nonPrice = String.valueOf(chargingCurrentData.getPowerUnitPrice()).replace(".0", "");
+        unitPrice.setText(getString(R.string.chargeUnitFormat, String.valueOf(nonPrice)));
 
         btn500 = view.findViewById(R.id.btn500);
         btn500.setOnClickListener(this);
@@ -115,7 +115,6 @@ public class CreditCardFragment extends Fragment implements View.OnClickListener
         btnClear.setOnClickListener(this);
         btnPay = view.findViewById(R.id.btnPay);
         btnPay.setOnClickListener(this);
-
 
         return view;
     }
@@ -159,25 +158,6 @@ public class CreditCardFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        if (countHandler != null) {
-            countHandler.removeCallbacks(countRunnable);
-            countHandler.removeCallbacksAndMessages(null);
-            countHandler.removeMessages(0);
-        }
-
-        SharedModel sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-        String[] requestStrings = new String[1];
-        requestStrings[0] = "0";
-        sharedModel.setMutableLiveData(requestStrings);
-    }
-
-    private double setAmounts(String amountSum, String amount) {
-        return Integer.parseInt(amountSum.replaceAll("[^0-9]", "")) + Integer.parseInt(amount);
-    }
-
-    @Override
     public void onClick(View v) {
         try {
             int getId = v.getId();
@@ -210,5 +190,24 @@ public class CreditCardFragment extends Fragment implements View.OnClickListener
         } catch (Exception e) {
             logger.error("CreditCardFragment onClick : {}", e.getMessage());
         }
+    }
+
+    private double setAmounts(String amountSum, String amount) {
+        return Integer.parseInt(amountSum.replaceAll("[^0-9]", "")) + Integer.parseInt(amount);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (countHandler != null) {
+            countHandler.removeCallbacks(countRunnable);
+            countHandler.removeCallbacksAndMessages(null);
+            countHandler.removeMessages(0);
+        }
+
+        SharedModel sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
+        String[] requestStrings = new String[1];
+        requestStrings[0] = "0";
+        sharedModel.setMutableLiveData(requestStrings);
     }
 }

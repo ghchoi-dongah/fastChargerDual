@@ -1,5 +1,6 @@
 package com.dongah.fastcharger.pages;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,8 +46,10 @@ public class MemberCardFragment extends Fragment {
     private String mParam2;
     private int mChannel;
 
+    int MAX_TIME = 20;
     int cnt = 0;
     ImageView imgMemberCardTagging;
+    TextView textViewTagTimer;
     AnimationDrawable animationDrawable;
     Handler countHandler;
     Runnable countRunnable;
@@ -86,8 +90,8 @@ public class MemberCardFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_member_card, container, false);
+        textViewTagTimer = view.findViewById(R.id.textViewTagTimer);
         imgMemberCardTagging = view.findViewById(R.id.imgMemberCardTagging);
         imgMemberCardTagging.setBackgroundResource(R.drawable.membercardtagging);
         animationDrawable = (AnimationDrawable) imgMemberCardTagging.getBackground();
@@ -102,6 +106,7 @@ public class MemberCardFragment extends Fragment {
         return view;
     }
 
+    @SuppressLint("SetTextI18n")
     @SuppressWarnings("ConstantConditions")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -113,18 +118,22 @@ public class MemberCardFragment extends Fragment {
             mediaPlayer.start();
 
             animationDrawable.start();
+            textViewTagTimer.setText(MAX_TIME + "초");
+            
             //count
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     countHandler = new Handler();
                     countRunnable = new Runnable() {
+                        @SuppressLint("SetTextI18n")
                         @Override
                         public void run() {
                             cnt++;
-                            if (Objects.equals(cnt, 20)) {
+                            if (Objects.equals(cnt, MAX_TIME)) {
                                 ((MainActivity) getActivity()).getClassUiProcess(mChannel).onHome();
                             } else {
+                                textViewTagTimer.setText((MAX_TIME - cnt) + "초");
                                 countHandler.postDelayed(countRunnable, 1000);
                             }
                         }
@@ -138,7 +147,6 @@ public class MemberCardFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onDetach() {
         super.onDetach();
@@ -146,12 +154,13 @@ public class MemberCardFragment extends Fragment {
             animationDrawable.stop();
             ((AnimationDrawable) imgMemberCardTagging.getBackground()).stop();
             imgMemberCardTagging.setBackground(null);
-            countHandler.removeCallbacks(countRunnable);
-            countHandler.removeCallbacksAndMessages(null);
-            countHandler.removeMessages(0);
+            if (countHandler != null) {
+                countHandler.removeCallbacks(countRunnable);
+                countHandler.removeCallbacksAndMessages(null);
+                countHandler.removeMessages(0);
+            }
         } catch (Exception e) {
             logger.error("MemberCardFragment onDetach error : {} ", e.getMessage());
         }
     }
-
 }

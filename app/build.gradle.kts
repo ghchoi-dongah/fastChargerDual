@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.circulrprogress)
     implementation(libs.bouncycastle)
     implementation(libs.commonsnet)
+    implementation(libs.avloading)
 
     implementation(libs.appcompat)
     implementation(libs.material)

@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.UiSeq;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +47,10 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
     private String mParam2;
     private int mChannel;
 
-    LinearLayout loadingContainer;
-    final String[] colors = { "#FFD6BA", "#FABD8C", "#F5A55D", "#EF8C2F", "#EA7300"};
-    final int[] dotIds = { R.id.dot1, R.id.dot2, R.id.dot3, R.id.dot4, R.id.dot5 };
-    Handler handler;
-    int currentStep = 0;
     View view;
     TextView txtMessage;
     Button btnCancel, btnConfirm;
+    AVLoadingIndicatorView avi;
 
     public MessageYesNoFragment() {
         // Required empty public constructor
@@ -90,14 +87,13 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_message_yes_no, container, false);
         txtMessage = view.findViewById(R.id.txtMessage);
-        loadingContainer = view.findViewById(R.id.loadingContainer);
         btnCancel = view.findViewById(R.id.btnCancel);
         btnCancel.setOnClickListener(this);
         btnConfirm = view.findViewById(R.id.btnConfirm);
         btnConfirm.setOnClickListener(this);
+        avi = view.findViewById(R.id.avi);
         return view;
     }
 
@@ -105,10 +101,13 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.messageyesno);
-        mediaPlayer.setOnCompletionListener(MediaPlayer::release);
-        mediaPlayer.start();
-
+        try {
+            MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.messageyesno);
+            mediaPlayer.setOnCompletionListener(MediaPlayer::release);
+            mediaPlayer.start();
+        } catch (Exception e) {
+            logger.error("MessageYesNoFragment onViewCreated error : {}", e.getMessage());
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -124,50 +123,28 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
                 ((MainActivity) MainActivity.mContext).getControlBoard().getTxData(mChannel).setStop(true);
                 ((MainActivity) MainActivity.mContext).getControlBoard().getTxData(mChannel).setStart(false);
                 txtMessage.setText(R.string.stoppingMessage);
-                loadingContainer.setVisibility(View.VISIBLE);
                 btnConfirm.setVisibility(View.INVISIBLE);
                 btnCancel.setVisibility(View.INVISIBLE);
-                //
-                handler = new Handler(Looper.getMainLooper());
-                startDotLoop(view);
+                avi.setVisibility(View.VISIBLE);
+                startAviAnim();
             }
-
         } catch (Exception e) {
             logger.error("MessageYesNoFragment  onClick : {} ", e.getMessage());
         }
     }
 
-    private void startDotLoop(View root) {
-        currentStep = 0;
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (currentStep < dotIds.length) {
-                    View dot = root.findViewById(dotIds[currentStep]);
-                    GradientDrawable drawable = new GradientDrawable();
-                    drawable.setShape(GradientDrawable.OVAL);
-                    drawable.setColor(Color.parseColor(colors[currentStep]));
-                    dot.setBackground(drawable);
-                    dot.setVisibility(View.VISIBLE);
-                    currentStep++;
-                    handler.postDelayed(this, 200);
-                } else {
-                    handler.postDelayed(() -> {
-                        for (int id : dotIds) {
-                            View dot = root.findViewById(id);
-                            dot.setVisibility(View.INVISIBLE);
-                        }
-                        // 다음 사이클 시작
-                        startDotLoop(root);
-                    }, 400); // 다 보여진 후 0.8초 기다림
-                }
-            }
-        }, 400);
+    void startAviAnim() {
+        avi.show();
     }
+
+    void stopAviAnim() {
+        avi.hide();
+    }
+
 
     @Override
     public void onDetach() {
         super.onDetach();
-        if (handler != null) handler.removeCallbacksAndMessages(null);
+        stopAviAnim();
     }
 }

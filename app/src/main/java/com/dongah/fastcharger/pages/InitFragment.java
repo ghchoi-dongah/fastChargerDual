@@ -79,8 +79,9 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     ChargerConfiguration chargerConfiguration;
     ChargingCurrentData chargingCurrentData;
     Animation animBlink;
-    TextView txtInitMessage, txtAnnounce;
-    ImageView btnQr, btnInit, imageCheck, imgComboGlow;
+    View viewCircle;
+    TextView textViewConnector, textViewInitMessage, txtMemberUnitInput;
+    ImageView btnQr, imageViewCar;
     SharedModel sharedModel;
     String[] requestStrings = new String[1];
     Handler qrHandler;
@@ -121,40 +122,47 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_init, container, false);
-//        txtAnnounce = view.findViewById(R.id.txtAnnounce);
-        txtInitMessage = view.findViewById(R.id.txtInitMessage);
-        btnQr = view.findViewById(R.id.btnQr);
-        btnQr.setOnClickListener(this);
-        imgComboGlow = view.findViewById(R.id.imgComboGlow);
-        imageCheck = view.findViewById(R.id.bgCheck);
-
         animBlink = AnimationUtils.loadAnimation(getActivity(), R.anim.blink);
-        txtInitMessage.startAnimation(animBlink);
-        imgComboGlow.startAnimation(animBlink);
-        txtInitMessage.setOnClickListener(this);
-        btnInit = view.findViewById(R.id.btnInit);
-        btnInit.setOnClickListener(this);
+        viewCircle = view.findViewById(R.id.viewCircle);
+        viewCircle.setOnClickListener(this);
+        textViewConnector = view.findViewById(R.id.textViewConnector);
+        imageViewCar = view.findViewById(R.id.imageViewCar);
+        textViewInitMessage = view.findViewById(R.id.textViewInitMessage);
+        textViewInitMessage.startAnimation(animBlink);
+        txtMemberUnitInput = view.findViewById(R.id.txtMemberUnitInput);
+
+        try {
+            if (mChannel == 0) {
+                imageViewCar.setScaleX(1f);
+                textViewConnector.setText(R.string.leftConnector);
+            } else {
+                imageViewCar.setScaleX(-1f);
+                textViewConnector.setText(R.string.rightConnector);
+            }
+        } catch (Exception e) {
+            logger.error("InitFragment onCreateView error : {}", e.getMessage());
+        }
+
 
         //Qr
-        qrHandler = new Handler();
-        qrHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    chargerConfiguration = ((MainActivity) getActivity()).getChargerConfiguration();
-                    if (!TextUtils.isEmpty(chargerConfiguration.getChargerId())) {
-                        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                        Bitmap bitmap = barcodeEncoder.encodeBitmap("/" + chargerConfiguration.getChargerId() + "/0" + (mChannel + 1),
-                                BarcodeFormat.QR_CODE, 600, 600);
-                        btnQr.setImageBitmap(toGrayscale(bitmap));
-                    }
-                } catch (Exception e) {
-                    logger.error("QrCode : {}", e.getMessage());
-                }
-            }
-        }, 10000);
+//        qrHandler = new Handler();
+//        qrHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    chargerConfiguration = ((MainActivity) getActivity()).getChargerConfiguration();
+//                    if (!TextUtils.isEmpty(chargerConfiguration.getChargerId())) {
+//                        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+//                        Bitmap bitmap = barcodeEncoder.encodeBitmap("/" + chargerConfiguration.getChargerId() + "/0" + (mChannel + 1),
+//                                BarcodeFormat.QR_CODE, 600, 600);
+//                        btnQr.setImageBitmap(toGrayscale(bitmap));
+//                    }
+//                } catch (Exception e) {
+//                    logger.error("QrCode : {}", e.getMessage());
+//                }
+//            }
+//        }, 10000);
 
         return view;
     }
@@ -165,12 +173,12 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         try {
-
-            //사용 단가 갖도 오기
+            ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel).setConnectorId(mChannel+1);
+            //사용 단가 갖고 오기
             Set<String> userTypes = new HashSet<>(Arrays.asList("A", "B"));
             Map<String, Integer> unitPrices = onFindUnitPrices(userTypes);
             chargingCurrentData = ((MainActivity) getActivity()).getChargingCurrentData(mChannel);
-//            textViewMemberUnitInput.setText(String.format("   :  %s 원", unitPrices.getOrDefault("A", 0)));
+            txtMemberUnitInput.setText(getString(R.string.chargeUnitFormat, String.valueOf(unitPrices.getOrDefault("A", 0))));
             chargingCurrentData.setPowerUnitPrice(Double.parseDouble(String.valueOf(unitPrices.getOrDefault("A", 0))));
 
 
@@ -178,7 +186,7 @@ public class InitFragment extends Fragment implements View.OnClickListener {
             sharedModel.getLiveData().observe(getViewLifecycleOwner(), new Observer<String[]>() {
                 @Override
                 public void onChanged(String[] strings) {
-                    // UiSeq = MEMBER_CARD(4), MEMBER_CARD_WAIT(5), CREDIT_CARD(6), CREDIT_CARD_WAIT(7) 일떄
+                    // UiSeq = MEMBER_CARD(4), MEMBER_CARD_WAIT(5), CREDIT_CARD(6), CREDIT_CARD_WAIT(7) 일때
                     try {
                         int otherChannel = Integer.parseInt(strings[0]);
                         UiSeq otherUiSeq = ((MainActivity) getActivity()).getClassUiProcess(otherChannel).getUiSeq();
@@ -187,14 +195,14 @@ public class InitFragment extends Fragment implements View.OnClickListener {
                             case MEMBER_CARD_WAIT:
                             case CREDIT_CARD:
                             case CREDIT_CARD_WAIT:
-                                imageCheck.setVisibility(View.VISIBLE);
-                                btnQr.setVisibility(View.INVISIBLE);
-                                txtInitMessage.setVisibility(View.INVISIBLE);
+//                                imageCheck.setVisibility(View.VISIBLE);
+//                                btnQr.setVisibility(View.INVISIBLE);
+//                                txtInitMessage.setVisibility(View.INVISIBLE);
                                 break;
                             default:
-                                imageCheck.setVisibility(View.INVISIBLE);
-                                btnQr.setVisibility(View.VISIBLE);
-                                txtInitMessage.setVisibility(View.VISIBLE);
+//                                imageCheck.setVisibility(View.INVISIBLE);
+//                                btnQr.setVisibility(View.VISIBLE);
+//                                txtInitMessage.setVisibility(View.VISIBLE);
 
                                 break;
                         }
@@ -212,51 +220,46 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         try {
-            int id = v.getId();
-            // 초기 화면 으로 전환이 된 경우, current data clear
+            if (!Objects.equals(v.getId(), R.id.viewCircle)) return;
 
+            // 초기 화면 으로 전환이 된 경우, current data clear
             chargingCurrentData.onCurrentDataClear();
             chargingCurrentData.setConnectorId(mChannel + 1);
 
-            if (Objects.equals(imageCheck.getVisibility(), View.VISIBLE)) return;
+            int id = v.getId();
+            //* page change*/
+            ((MainActivity) getActivity()).getChargingCurrentData(mChannel).setChargerPointType(ChargerPointType.COMBO);
+            ((MainActivity) getActivity()).getChargingCurrentData(mChannel).setConnectorId(mChannel + 1);
 
-            if (Objects.equals(id, R.id.btnInit) | Objects.equals(id, R.id.txtInitMessage)) {
-                //* page change*/
-                ((MainActivity) getActivity()).getChargingCurrentData(mChannel).setChargerPointType(ChargerPointType.COMBO);
-                ((MainActivity) getActivity()).getChargingCurrentData(mChannel).setConnectorId(mChannel + 1);
-                if (Objects.equals(((MainActivity) getActivity()).getChargerConfiguration().getAuthMode(), "0")) {
-                    if (!onUnitPrice()) {
-                        Toast.makeText(getActivity(), "단가 정보가 없습니다. \n잠시 후, 충전하세요!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    try {
-                        SocketState socketState = ((MainActivity) getActivity()).getSocketReceiveMessage().getSocket().getState();
-                        if (Objects.equals(socketState, SocketState.OPEN)) {
-                            ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.AUTH_SELECT);
-                            ((MainActivity) getActivity()).getFragmentChange().onFragmentChange(mChannel, UiSeq.AUTH_SELECT, "AUTH_SELECT", null);
-                        } else {
-                            ((MainActivity) getActivity()).getToastPositionMake().onShowToast(mChannel, "서버 연결 DISCONNECT. \n충전을 할 수 없습니다.");
-                        }
-                    } catch (Exception e){
-                        ((MainActivity) getActivity()).getToastPositionMake().onShowToast(mChannel, "서버 연결 DISCONNECT. \n충전을 할 수 없습니다.");
-                        logger.error(e.getMessage());
-                    }
-                } else if (Objects.equals(((MainActivity) getActivity()).getChargerConfiguration().getAuthMode(), "4")) {
-                    ((MainActivity) getActivity()).getControlBoard().getTxData(mChannel).setStart(true);
-                    ((MainActivity) getActivity()).getControlBoard().getTxData(mChannel).setStop(false);
-                    ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.CONNECT_CHECK);
-                } else {
-                    ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.PLUG_CHECK);
-                    double testPrice = Double.parseDouble(((MainActivity) getActivity()).getChargerConfiguration().getTestPrice());
-                    ((MainActivity) getActivity()).getChargingCurrentData(mChannel).setPowerUnitPrice(testPrice);
-                    ((MainActivity) getActivity()).getFragmentChange().onFragmentChange(mChannel, UiSeq.PLUG_CHECK, "PLUG_CHECK", null);
+            if (Objects.equals(((MainActivity) getActivity()).getChargerConfiguration().getAuthMode(), "0")) {
+                if (!onUnitPrice()) {
+                    Toast.makeText(getActivity(), "단가 정보가 없습니다. \n잠시 후, 충전하세요!", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-            } else if (Objects.equals(id, R.id.btnQr)) {
-                ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.QR_CODE);
-                ((MainActivity) getActivity()).getFragmentChange().onFragmentChange(mChannel, UiSeq.QR_CODE, "QR_CODE", null);
+                try {
+                    SocketState socketState = ((MainActivity) getActivity()).getSocketReceiveMessage().getSocket().getState();
+                    if (Objects.equals(socketState, SocketState.OPEN)) {
+                        ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.AUTH_SELECT);
+                        ((MainActivity) getActivity()).getFragmentChange().onFragmentChange(mChannel, UiSeq.AUTH_SELECT, "AUTH_SELECT", null);
+                    } else {
+                        ((MainActivity) getActivity()).getToastPositionMake().onShowToast(mChannel, "서버 연결 DISCONNECT. \n충전을 할 수 없습니다.");
+                    }
+                } catch (Exception e){
+                    ((MainActivity) getActivity()).getToastPositionMake().onShowToast(mChannel, "서버 연결 DISCONNECT. \n충전을 할 수 없습니다.");
+                    logger.error(e.getMessage());
+                }
+            } else if (Objects.equals(((MainActivity) getActivity()).getChargerConfiguration().getAuthMode(), "4")) {
+                ((MainActivity) getActivity()).getControlBoard().getTxData(mChannel).setStart(true);
+                ((MainActivity) getActivity()).getControlBoard().getTxData(mChannel).setStop(false);
+                ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.CONNECT_CHECK);
+            } else {
+                ((MainActivity) getActivity()).getClassUiProcess(mChannel).setUiSeq(UiSeq.PLUG_CHECK);
+                double testPrice = Double.parseDouble(((MainActivity) getActivity()).getChargerConfiguration().getTestPrice());
+                ((MainActivity) getActivity()).getChargingCurrentData(mChannel).setPowerUnitPrice(testPrice);
+                ((MainActivity) getActivity()).getFragmentChange().onFragmentChange(mChannel, UiSeq.PLUG_CHECK, "PLUG_CHECK", null);
             }
         } catch (Exception e) {
-            logger.error("init onClick error : {}", e.getMessage());
+            logger.error("InitFragment onClick error : {}", e.getMessage());
         }
     }
 
@@ -295,7 +298,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
         return bmpGrayscale;
     }
 
-
     private boolean onUnitPrice() {
         boolean result = false;
         try {
@@ -306,7 +308,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
         }
         return result;
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public Map<String, Integer> onFindUnitPrices(Set<String> userTypes) {
@@ -336,11 +337,11 @@ public class InitFragment extends Fragment implements View.OnClickListener {
 
                             if ((now.isEqual(startAt) || now.isAfter(startAt)) && (now.isBefore(endAt) || now.isEqual(endAt))) {
                                 resultMap.put(userType, obj.getInt("price"));
-                                break; // 그 userType에 대해 단가 찾았으면 다음 라인으로 넘어감
+                                break; // 그 userType에 대해 단가 정보를 찾으면 다음 라인으로 넘어감
                             }
                         }
 
-                        // 모든 userType이 다 찾아졌으면 종료
+                        // 모든 userType을 찾으면 종료
                         if (resultMap.keySet().containsAll(userTypes)) {
                             break;
                         }

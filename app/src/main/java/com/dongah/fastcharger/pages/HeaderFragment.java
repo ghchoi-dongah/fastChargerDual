@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
+import com.dongah.fastcharger.basefunction.ChargerConfiguration;
 import com.dongah.fastcharger.basefunction.UiSeq;
 import com.dongah.fastcharger.utils.SharedModel;
 
@@ -40,13 +42,14 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
-    int clickedCnt = 0;
-    ImageButton btnHome, btnLogo;
-    SharedModel sharedModel;
     int mChannel;
 
+    int clickedCnt = 0;
     View view;
+    TextView textViewChargerId;
+    ImageButton btnHome, btnLogo;
+    ChargerConfiguration chargerConfiguration;
+    SharedModel sharedModel;
 
     public HeaderFragment() {
         // Required empty public constructor
@@ -79,11 +82,10 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_header, container, false);
 
         btnHome = view.findViewById(R.id.btnHome);
@@ -113,6 +115,9 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
                 clickedCnt++;
             }
         });
+        textViewChargerId = view.findViewById(R.id.textViewChargerId);
+        chargerConfiguration = ((MainActivity) MainActivity.mContext).getChargerConfiguration();
+        textViewChargerId.setText("ID-" + chargerConfiguration.getChargerId());
         return view;
     }
 
@@ -129,7 +134,6 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
                     mChannel = Integer.parseInt(strings[0]);
                     UiSeq uiSeq = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).getUiSeq();
                     switch (uiSeq) {
-                        case INIT:
                         case MEMBER_CARD_WAIT:
                         case CREDIT_CARD_WAIT:
                         case CHARGING:

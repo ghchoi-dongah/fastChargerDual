@@ -247,7 +247,7 @@ public class SocketReceiveMessage extends JSONCommunicator implements SocketInte
         onSocketInitialize();
     }
 
-    private void onSocketInitialize() {
+    public void onSocketInitialize() {
         try {
             socket = new Socket(url);
             socket.getInstance(this);
@@ -430,7 +430,7 @@ public class SocketReceiveMessage extends JSONCommunicator implements SocketInte
                                             ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getChannel(), UiSeq.CHARGING_STOP_MESSAGE, "CHARGING_STOP_MESSAGE", null);
                                         } else {
                                             ((MainActivity) MainActivity.mContext).getClassUiProcess(getChannel()).setUiSeq(UiSeq.CHARGING);
-                                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "full");
+                                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "small");
                                         }
                                     } else {
                                         chargingCurrentData.setParentIdTag(parentIdTag);
@@ -470,7 +470,7 @@ public class SocketReceiveMessage extends JSONCommunicator implements SocketInte
                                     String certificationReason = status.name();
                                     if (Objects.equals(uiSeq, UiSeq.CHARGING)) {
                                         ((MainActivity) MainActivity.mContext).getClassUiProcess(getChannel()).setUiSeq(UiSeq.CHARGING);
-                                        fragmentChange.onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "full");
+                                        fragmentChange.onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "small");
                                         getToastPositionMake().onShowToast(getChannel(), "충전 중지 인증 실패 : " + certificationReason);
                                     } else {
                                         ((MainActivity) MainActivity.mContext).getChargingCurrentData(getChannel()).setAuthorizeResult(false);
@@ -527,7 +527,7 @@ public class SocketReceiveMessage extends JSONCommunicator implements SocketInte
                                 uiSeq = ((MainActivity) MainActivity.mContext).getClassUiProcess(getChannel()).getUiSeq();
                                 if (Objects.equals(status, AuthorizationStatus.Accepted)) {
                                     ((MainActivity) MainActivity.mContext).getClassUiProcess(getChannel()).setUiSeq(UiSeq.CHARGING);
-                                    fragmentChange.onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "full");
+                                    fragmentChange.onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "small");
                                 } else {
                                     //충전기 정지
                                     TxData txData = ((MainActivity) MainActivity.mContext).getControlBoard().getTxData(getChannel());

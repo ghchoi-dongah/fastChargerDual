@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,6 +30,7 @@ import com.dongah.fastcharger.websocket.ocpp.core.ChargePointStatus;
 import com.dongah.fastcharger.websocket.ocpp.core.Reason;
 import com.dongah.fastcharger.websocket.socket.SocketReceiveMessage;
 import com.dongah.fastcharger.websocket.socket.SocketState;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,7 @@ import java.util.Objects;
  * Use the {@link MemberCardWaitFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MemberCardWaitFragment extends Fragment implements View.OnClickListener {
+public class MemberCardWaitFragment extends Fragment  {
 
     private static final Logger logger = LoggerFactory.getLogger(MemberCardWaitFragment.class);
 
@@ -56,13 +58,13 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
     private String mParam2;
     private int mChannel;
 
-    LinearLayout loadingContainer;
-    final String[] colors = { "#b4c7e7", "#8fa3c6", "#6a8ea6", "#455c85", "#203864" };
-    final int[] dotIds = { R.id.dot1, R.id.dot2, R.id.dot3, R.id.dot4, R.id.dot5 };
+
     Handler handler;
     int currentStep = 0;
 
     int cnt = 0;
+    TextView txtMemberWaiting;
+    AVLoadingIndicatorView avi;
 
     ClassUiProcess classUiProcess;
     ChargingCurrentData chargingCurrentData;
@@ -107,12 +109,10 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_member_card_wait, container, false);
-        loadingContainer = view.findViewById(R.id.loadingContainer);
+        txtMemberWaiting = view.findViewById(R.id.txtMemberWaiting);
+        avi = view.findViewById(R.id.avi);
         handler = new Handler(Looper.getMainLooper());
-        startDotLoop(view);
-        loadingContainer.setOnClickListener(this);
         return view;
     }
 
@@ -123,7 +123,7 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         try {
-
+            startAviAnim();
             chargerConfiguration = ((MainActivity) MainActivity.mContext).getChargerConfiguration();
             classUiProcess = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel);
             chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
@@ -151,7 +151,9 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
                                 }
                                 //authorize result check
                                 if (!chargingCurrentData.isAuthorizeResult()) {
-//                                textView.setText(getResources().getText(R.string.txtMemberFail));
+//                                    txtMemberWaiting.setText(getResources().getText(R.string.txtMemberFail));
+                                    avi.setVisibility(View.INVISIBLE);
+                                    stopAviAnim();
                                     if (handler != null) handler.removeCallbacksAndMessages(null);
                                 }
                             } catch (Exception e){
@@ -180,7 +182,7 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
                         ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING_STOP_MESSAGE, "CHARGING_STOP_MESSAGE", null);
                     } else {
                         classUiProcess.setUiSeq(UiSeq.CHARGING);
-                        ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "full");
+                        ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
                     }
                 } else {
                     if (!Objects.equals(chargingCurrentData.getChargePointStatus(), ChargePointStatus.Preparing) &&
@@ -263,7 +265,7 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
                                 ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING_STOP_MESSAGE, "CHARGING_STOP_MESSAGE", null);
                             } else {
                                 classUiProcess.setUiSeq(UiSeq.CHARGING);
-                                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "full");
+                                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
                             }
                         } else {
                             if (Objects.equals(idTagInfo[0], chargingCurrentData.getIdTag()) || GlobalVariables.isAllowOfflineTxForUnknownId() ||
@@ -291,7 +293,7 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
                         Toast.makeText(getActivity(), "서버와 통신 DISCONNECT!!! 인증 실패. ", Toast.LENGTH_SHORT).show();
                         if (Objects.equals(UiSeq.CHARGING, uiSeq)) {
                             ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CHARGING);
-                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "full");
+                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
                         } else {
                             ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).onHome();
                         }
@@ -305,52 +307,19 @@ public class MemberCardWaitFragment extends Fragment implements View.OnClickList
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        try {
-            int getId = v.getId();
-            if (Objects.equals(getId, R.id.loadingContainer)) {
-                ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.PLUG_CHECK);
-                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel, UiSeq.PLUG_CHECK,"PLUG_CHECK",null);
-            }
-        } catch (Exception e) {
-            logger.error("MemberCardWaitFragment onClick : {} ", e.getMessage());
-        }
-
-    }
-    private void startDotLoop(View root) {
-        currentStep = 0;
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (currentStep < dotIds.length) {
-                    View dot = root.findViewById(dotIds[currentStep]);
-                    GradientDrawable drawable = new GradientDrawable();
-                    drawable.setShape(GradientDrawable.OVAL);
-                    drawable.setColor(Color.parseColor(colors[currentStep]));
-                    dot.setBackground(drawable);
-                    dot.setVisibility(View.VISIBLE);
-                    currentStep++;
-                    handler.postDelayed(this, 200);
-                } else {
-                    handler.postDelayed(() -> {
-                        for (int id : dotIds) {
-                            View dot = root.findViewById(id);
-                            dot.setVisibility(View.INVISIBLE);
-                        }
-                        // 다음 사이클 시작
-                        startDotLoop(root);
-                    }, 400); // 다 보여진 후 0.8초 기다림
-                }
-            }
-        }, 400);
+    void startAviAnim() {
+        avi.show();
     }
 
+    void stopAviAnim() {
+        avi.hide();
+    }
 
     @Override
     public void onDetach() {
         super.onDetach();
         try {
+            stopAviAnim();
             if (handler != null) {
                 countHandler.removeCallbacks(countRunnable);
                 countHandler.removeCallbacksAndMessages(null);

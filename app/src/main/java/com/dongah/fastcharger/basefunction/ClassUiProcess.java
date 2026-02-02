@@ -215,7 +215,7 @@ public class ClassUiProcess implements TLS3800Listener {
                         if (!Objects.equals(chargerConfiguration.getAuthMode(), "0") ||
                                 (SocketState.OPEN != socketReceiveMessage.getSocket().getState() && !GlobalVariables.isStopTransactionOnInvalidId())) {
                             setUiSeq(UiSeq.CHARGING);
-                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getCh(), UiSeq.CHARGING, "CHARGING", "full");
+                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getCh(), UiSeq.CHARGING, "CHARGING", "small");
                         }
                         if (Objects.equals(chargerConfiguration.getAuthMode(), "0")) {
                             //meter values start
@@ -285,7 +285,7 @@ public class ClassUiProcess implements TLS3800Listener {
                                 }
                             }
                         } else {
-                            if (rxData.isCsStop() || !rxData.isCsPilot() || chargingCurrentData.isUserStop()) {
+                            if (rxData.isCsStop() || !rxData.isCsPilot() || chargingCurrentData.isUserStop() || rxData.getSoc() >= chargerConfiguration.getTargetSoc()) {
 //                                    (chargingCurrentData.getHmChargingLimitFee() <= chargingCurrentData.getPowerMeterUsePay())) {
                                 controlBoard.getTxData(getCh()).setStop(true);
                                 controlBoard.getTxData(getCh()).setStart(false);
@@ -762,6 +762,7 @@ public class ClassUiProcess implements TLS3800Listener {
             chargingCurrentData.setOutPutCurrent(rxData.getOutCurrent());  //출력전류
             chargingCurrentData.setOutPutVoltage(rxData.getOutVoltage());  //출력전압
             chargingCurrentData.setPowerMeter(rxData.getPowerMeter());  //전력량
+            chargingCurrentData.setTargetCurrent(rxData.getCsmEVTargetCurrent());   // 요청전류
             chargingCurrentData.setFrequency(60);    //주파수
             chargingCurrentData.setChargingRemainTime(rxData.getRemainTime());  //충전 남은 시간
             chargingCurrentData.setSoc(rxData.getSoc());
