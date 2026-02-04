@@ -28,7 +28,8 @@ public class ChargerConfiguration {
     /**
      * TLS3800 id
      */
-    public String MID = "KIOSK1114915545";
+//    public String MID = "KIOSK1114915545";
+    public String MID = "humax0001m";
 
     /**
      * Max Channel Count
