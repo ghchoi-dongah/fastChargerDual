@@ -132,7 +132,7 @@ public class PlugWaitFragment extends Fragment {
                         @Override
                         public void run() {
                             cnt++;
-                            if (Objects.equals(cnt, 50)) {
+                            if (Objects.equals(cnt, GlobalVariables.getConnectionTimeOut())) {
                                 countHandler.removeCallbacks(countRunnable);
                                 countHandler.removeCallbacksAndMessages(null);
                                 countHandler.removeMessages(0);
@@ -168,7 +168,10 @@ public class PlugWaitFragment extends Fragment {
                             //connecting wait
                             if (rxData.isCsPilot()) {
                                 cnt = 0;
-                                txtMessage.setText(R.string.EVCheckMessage);
+                                if (txtMessage.getTag() == null || !(boolean) txtMessage.getTag()) {
+                                    txtMessage.setText(R.string.EVCheckMessage);
+                                    txtMessage.setTag(true);
+                                }
                             }
                         }
                     };
@@ -193,6 +196,8 @@ public class PlugWaitFragment extends Fragment {
         super.onDetach();
         try {
             stopAviAnim();
+            requestStrings[0] = String.valueOf(mChannel);
+            sharedModel.setMutableLiveData(requestStrings);
             if (countHandler != null) {
                 countHandler.removeCallbacks(countRunnable);
                 countHandler.removeCallbacksAndMessages(null);
