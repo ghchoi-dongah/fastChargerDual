@@ -4,6 +4,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -133,9 +134,6 @@ public class PlugWaitFragment extends Fragment {
                         public void run() {
                             cnt++;
                             if (Objects.equals(cnt, GlobalVariables.getConnectionTimeOut())) {
-                                countHandler.removeCallbacks(countRunnable);
-                                countHandler.removeCallbacksAndMessages(null);
-                                countHandler.removeMessages(0);
                                 ((MainActivity) getActivity()).getControlBoard().getTxData(mChannel).setStart(false);
                                 ((MainActivity) getActivity()).getControlBoard().getTxData(mChannel).setStop(false);
                                 //선 결제에 의한 무카드 취소 (4:무카드 취소)(5:부분 취소)
@@ -179,32 +177,57 @@ public class PlugWaitFragment extends Fragment {
                 }
             });
         } catch (Exception e) {
+            Log.e("PlugWaitFragment", "onViewCreated error", e);
             logger.error("PlugWaitFragment onViewCreated : {}", e.getMessage());
         }
     }
 
     void startAviAnim() {
+        if (avi == null) return;
+        if (avi.getVisibility() != View.VISIBLE) avi.setVisibility(View.VISIBLE);
         avi.show();
     }
 
     void stopAviAnim() {
+        if (avi == null) return;
         avi.hide();
+        avi.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        try {
+            stopAviAnim();
+
+            if (countHandler != null) {
+                countHandler.removeCallbacksAndMessages(null);
+                countHandler = null;
+            }
+            countRunnable = null;
+
+        } catch (Exception e) {
+            Log.e("PlugWaitFragment", "onDestroyView error", e);
+            logger.error("PlugWaitFragment onDestroyView error : {}", e.getMessage());
+        }
+        super.onDestroyView();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         try {
-            stopAviAnim();
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
+//            if (countHandler != null) {
+//                countHandler.removeCallbacks(countRunnable);
+//                countHandler.removeCallbacksAndMessages(null);
+//                countHandler.removeMessages(0);
+//            }
             if (countHandler != null) {
-                countHandler.removeCallbacks(countRunnable);
                 countHandler.removeCallbacksAndMessages(null);
-                countHandler.removeMessages(0);
+                countHandler = null;
             }
         } catch (Exception e) {
-            logger.error("PlugWaitFragment onDetach : {}", e.getMessage());
+            Log.e("PlugWaitFragment", "onDetach error", e);
+            logger.error("PlugWaitFragment onDetach error : {}", e.getMessage());
         }
     }
 }

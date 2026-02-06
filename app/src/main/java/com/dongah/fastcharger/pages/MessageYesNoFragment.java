@@ -134,17 +134,29 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
     }
 
     void startAviAnim() {
+        if (avi == null) return;
+        if (avi.getVisibility() != View.VISIBLE) avi.setVisibility(View.VISIBLE);
         avi.show();
     }
 
     void stopAviAnim() {
+        if (avi == null) return;
         avi.hide();
+        avi.setVisibility(View.GONE);
     }
 
+    @Override
+    public void onDestroyView() {
+        try {
+            stopAviAnim();
+        } catch (Exception e) {
+            logger.error("MessageYesNoFragment onDestroyView error : {}", e.getMessage());
+        }
+        super.onDestroyView();
+    }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        stopAviAnim();
     }
 }

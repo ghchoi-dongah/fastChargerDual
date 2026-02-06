@@ -76,12 +76,12 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     private String mParam2;
     private int mChannel;
 
-    ChargerConfiguration chargerConfiguration;
-    ChargingCurrentData chargingCurrentData;
     Animation animBlink;
     View viewCircle;
     TextView textViewConnector, textViewInitMessage, txtMemberUnitInput;
-    ImageView btnQr, imageViewCar;
+    ImageView imageViewCar;
+    ChargerConfiguration chargerConfiguration;
+    ChargingCurrentData chargingCurrentData;
     SharedModel sharedModel;
     String[] requestStrings = new String[1];
     Handler qrHandler;
@@ -144,26 +144,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
             logger.error("InitFragment onCreateView error : {}", e.getMessage());
         }
 
-
-        //Qr
-//        qrHandler = new Handler();
-//        qrHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    chargerConfiguration = ((MainActivity) getActivity()).getChargerConfiguration();
-//                    if (!TextUtils.isEmpty(chargerConfiguration.getChargerId())) {
-//                        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-//                        Bitmap bitmap = barcodeEncoder.encodeBitmap("/" + chargerConfiguration.getChargerId() + "/0" + (mChannel + 1),
-//                                BarcodeFormat.QR_CODE, 600, 600);
-//                        btnQr.setImageBitmap(toGrayscale(bitmap));
-//                    }
-//                } catch (Exception e) {
-//                    logger.error("QrCode : {}", e.getMessage());
-//                }
-//            }
-//        }, 10000);
-
         return view;
     }
 
@@ -203,7 +183,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
 //                                imageCheck.setVisibility(View.INVISIBLE);
 //                                btnQr.setVisibility(View.VISIBLE);
 //                                txtInitMessage.setVisibility(View.VISIBLE);
-
                                 break;
                         }
                     } catch (Exception e) {
@@ -278,24 +257,8 @@ public class InitFragment extends Fragment implements View.OnClickListener {
             requestStrings[0] = String.valueOf(mChannel);
             sharedModel.setMutableLiveData(requestStrings);
         } catch (Exception e) {
-            logger.error("init onDetach error : {}", e.getMessage());
+            logger.error("InitFragment onDetach error : {}", e.getMessage());
         }
-    }
-
-    public Bitmap toGrayscale(Bitmap bmpOriginal) {
-        int width, height;
-        height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();
-
-        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmpGrayscale);
-        Paint paint = new Paint();
-        ColorMatrix cm = new ColorMatrix();
-        cm.setSaturation(0);
-        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
-        paint.setColorFilter(f);
-        c.drawBitmap(bmpOriginal, 0, 0, paint);
-        return bmpGrayscale;
     }
 
     private boolean onUnitPrice() {

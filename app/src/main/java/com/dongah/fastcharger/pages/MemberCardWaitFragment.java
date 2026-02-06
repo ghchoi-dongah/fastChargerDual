@@ -58,10 +58,6 @@ public class MemberCardWaitFragment extends Fragment  {
     private String mParam2;
     private int mChannel;
 
-
-    Handler handler;
-    int currentStep = 0;
-
     int cnt = 0;
     TextView txtMemberWaiting;
     AVLoadingIndicatorView avi;
@@ -72,7 +68,6 @@ public class MemberCardWaitFragment extends Fragment  {
     Handler countHandler;
     Runnable countRunnable;
 
-    View view;
 
     public MemberCardWaitFragment() {
         // Required empty public constructor
@@ -112,7 +107,6 @@ public class MemberCardWaitFragment extends Fragment  {
         View view = inflater.inflate(R.layout.fragment_member_card_wait, container, false);
         txtMemberWaiting = view.findViewById(R.id.txtMemberWaiting);
         avi = view.findViewById(R.id.avi);
-        handler = new Handler(Looper.getMainLooper());
         return view;
     }
 
@@ -153,8 +147,6 @@ public class MemberCardWaitFragment extends Fragment  {
                                 if (!chargingCurrentData.isAuthorizeResult()) {
 //                                    txtMemberWaiting.setText(getResources().getText(R.string.txtMemberFail));
                                     avi.setVisibility(View.INVISIBLE);
-                                    stopAviAnim();
-                                    if (handler != null) handler.removeCallbacksAndMessages(null);
                                 }
                             } catch (Exception e){
                                 logger.error(e.getMessage());
@@ -308,25 +300,38 @@ public class MemberCardWaitFragment extends Fragment  {
     }
 
     void startAviAnim() {
+        if (avi == null) return;
+        if (avi.getVisibility() != View.VISIBLE) avi.setVisibility(View.VISIBLE);
         avi.show();
     }
 
     void stopAviAnim() {
+        if (avi == null) return;
         avi.hide();
+        avi.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        try {
+            stopAviAnim();
+        } catch (Exception e) {
+            logger.error("MemberCardWaitFragment onDestroyView error : {}", e.getMessage());
+        }
+        super.onDestroyView();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         try {
-            stopAviAnim();
-            if (handler != null) {
+            if (countHandler != null) {
                 countHandler.removeCallbacks(countRunnable);
                 countHandler.removeCallbacksAndMessages(null);
                 countHandler.removeMessages(0);
             }
         } catch (Exception e) {
-            logger.error("MemberCardWaitFragment onDetach : {} ", e.getMessage());
+            logger.error("MemberCardWaitFragment onDetach error : {} ", e.getMessage());
         }
     }
 }

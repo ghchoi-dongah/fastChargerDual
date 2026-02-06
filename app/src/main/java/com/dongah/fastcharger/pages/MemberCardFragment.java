@@ -2,9 +2,11 @@ package com.dongah.fastcharger.pages;
 
 import android.annotation.SuppressLint;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,7 +114,7 @@ public class MemberCardFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         try {
-
+            cnt = 0;
             MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.membercard);
             mediaPlayer.setOnCompletionListener(MediaPlayer::release);
             mediaPlayer.start();
@@ -130,7 +132,7 @@ public class MemberCardFragment extends Fragment {
                         @Override
                         public void run() {
                             cnt++;
-                            if (Objects.equals(cnt, MAX_TIME)) {
+                            if (cnt >= MAX_TIME) {
                                 ((MainActivity) getActivity()).getClassUiProcess(mChannel).onHome();
                             } else {
                                 textViewTagTimer.setText((MAX_TIME - cnt) + "초");
@@ -143,23 +145,59 @@ public class MemberCardFragment extends Fragment {
             });
 
         } catch (Exception e) {
+            Log.e("MemberCardFragment", "onViewCreated error", e);
             logger.error("MemberCardFragment onViewCreated error : {} ", e.getMessage());
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        try {
+            if (animationDrawable != null) {
+                animationDrawable.stop();
+            }
+
+            if (imgMemberCardTagging != null) {
+                Drawable bg = imgMemberCardTagging.getBackground();
+                if (bg instanceof AnimationDrawable) {
+                    ((AnimationDrawable) bg).stop();
+                }
+                imgMemberCardTagging.setBackground(null);
+            }
+
+//            ((AnimationDrawable) imgMemberCardTagging.getBackground()).stop();
+//            imgMemberCardTagging.setBackground(null);
+
+            if (countHandler != null) {
+                countHandler.removeCallbacksAndMessages(null);
+                countHandler = null;
+            }
+            countRunnable = null;
+
+//            countHandler.removeCallbacksAndMessages(null);
+        } catch (Exception e) {
+            Log.e("MemberCardFragment", "onDestroyView error", e);
+            logger.error("MemberCardFragment onDestroyView error : {}", e.getMessage());
+        }
+        super.onDestroyView();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         try {
-            animationDrawable.stop();
-            ((AnimationDrawable) imgMemberCardTagging.getBackground()).stop();
-            imgMemberCardTagging.setBackground(null);
+//            if (countHandler != null) {
+//                countHandler.removeCallbacks(countRunnable);
+//                countHandler.removeCallbacksAndMessages(null);
+//                countHandler.removeMessages(0);
+//            }
+
             if (countHandler != null) {
-                countHandler.removeCallbacks(countRunnable);
                 countHandler.removeCallbacksAndMessages(null);
-                countHandler.removeMessages(0);
+                countHandler = null;
             }
         } catch (Exception e) {
+            Log.e("MemberCardFragment", "onDetach error", e);
             logger.error("MemberCardFragment onDetach error : {} ", e.getMessage());
         }
     }
