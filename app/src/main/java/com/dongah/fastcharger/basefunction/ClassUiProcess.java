@@ -215,7 +215,7 @@ public class ClassUiProcess implements TLS3800Listener {
                         if (!Objects.equals(chargerConfiguration.getAuthMode(), "0") ||
                                 (SocketState.OPEN != socketReceiveMessage.getSocket().getState() && !GlobalVariables.isStopTransactionOnInvalidId())) {
                             setUiSeq(UiSeq.CHARGING);
-                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getCh(), UiSeq.CHARGING, "CHARGING", "small");
+                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getCh(), UiSeq.CHARGING, "CHARGING", null);
                         }
                         if (Objects.equals(chargerConfiguration.getAuthMode(), "0")) {
                             //meter values start
@@ -422,7 +422,7 @@ public class ClassUiProcess implements TLS3800Listener {
                                             false));
                                 }
                             }
-                            fragmentChange.onFragmentChange(getCh(), UiSeq.FAULT, "FAULT", "full");
+                            fragmentChange.onFragmentChange(getCh(), UiSeq.FAULT, "FAULT", null);
                         }
                     }
 
@@ -530,7 +530,7 @@ public class ClassUiProcess implements TLS3800Listener {
             } else if (Objects.equals(TLS3800ResponseType.RF_READ, type))  {
                 if (uiSeq != UiSeq.MEMBER_CARD_WAIT) {
                     ((MainActivity) MainActivity.mContext).getClassUiProcess(ch).setUiSeq(UiSeq.MEMBER_CARD_WAIT);
-                    fragmentChange.onFragmentChange(ch, UiSeq.MEMBER_CARD_WAIT, null, null);
+                    fragmentChange.onFragmentChange(ch, UiSeq.MEMBER_CARD_WAIT, "MEMBER_CARD_WAIT", null);
                 }
             } else {
                 onHome();

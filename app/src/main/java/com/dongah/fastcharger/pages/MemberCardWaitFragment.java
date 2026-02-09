@@ -1,6 +1,8 @@
 package com.dongah.fastcharger.pages;
 
 import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,7 +63,8 @@ public class MemberCardWaitFragment extends Fragment  {
 
     int cnt = 0;
     TextView txtMemberWaiting;
-    AVLoadingIndicatorView avi;
+    ImageView imageViewLoading;
+    AnimationDrawable animationDrawable;
 
     ClassUiProcess classUiProcess;
     ChargingCurrentData chargingCurrentData;
@@ -106,10 +110,11 @@ public class MemberCardWaitFragment extends Fragment  {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_member_card_wait, container, false);
         txtMemberWaiting = view.findViewById(R.id.txtMemberWaiting);
-        avi = view.findViewById(R.id.avi);
+        imageViewLoading = view.findViewById(R.id.imageViewLoading);
+        imageViewLoading.setBackgroundResource(R.drawable.ani_loading);
+        animationDrawable = (AnimationDrawable) imageViewLoading.getBackground();
         return view;
     }
-
 
 
     @SuppressWarnings("ConstantConditions")
@@ -117,16 +122,14 @@ public class MemberCardWaitFragment extends Fragment  {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         try {
-            startAviAnim();
+            animationDrawable.start();
             chargerConfiguration = ((MainActivity) MainActivity.mContext).getChargerConfiguration();
             classUiProcess = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel);
             chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
 
-
             MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.membercardwait);
             mediaPlayer.setOnCompletionListener(MediaPlayer::release);
             mediaPlayer.start();
-
 
             ((MainActivity) MainActivity.mContext).runOnUiThread(new Runnable() {
                 @Override
@@ -146,7 +149,7 @@ public class MemberCardWaitFragment extends Fragment  {
                                 //authorize result check
                                 if (!chargingCurrentData.isAuthorizeResult()) {
 //                                    txtMemberWaiting.setText(getResources().getText(R.string.txtMemberFail));
-                                    avi.setVisibility(View.INVISIBLE);
+                                    animationDrawable.stop();
                                 }
                             } catch (Exception e){
                                 logger.error(e.getMessage());
@@ -174,7 +177,7 @@ public class MemberCardWaitFragment extends Fragment  {
                         ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING_STOP_MESSAGE, "CHARGING_STOP_MESSAGE", null);
                     } else {
                         classUiProcess.setUiSeq(UiSeq.CHARGING);
-                        ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
+                        ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", null);
                     }
                 } else {
                     if (!Objects.equals(chargingCurrentData.getChargePointStatus(), ChargePointStatus.Preparing) &&
@@ -257,7 +260,7 @@ public class MemberCardWaitFragment extends Fragment  {
                                 ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING_STOP_MESSAGE, "CHARGING_STOP_MESSAGE", null);
                             } else {
                                 classUiProcess.setUiSeq(UiSeq.CHARGING);
-                                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
+                                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", null);
                             }
                         } else {
                             if (Objects.equals(idTagInfo[0], chargingCurrentData.getIdTag()) || GlobalVariables.isAllowOfflineTxForUnknownId() ||
@@ -285,36 +288,33 @@ public class MemberCardWaitFragment extends Fragment  {
                         Toast.makeText(getActivity(), "서버와 통신 DISCONNECT!!! 인증 실패. ", Toast.LENGTH_SHORT).show();
                         if (Objects.equals(UiSeq.CHARGING, uiSeq)) {
                             ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CHARGING);
-                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
+                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", null);
                         } else {
                             ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).onHome();
                         }
                     }
                 }
             }
-
-
         } catch (Exception e) {
             logger.error(" MemberCardWaitFragment error : {}", e.getMessage());
         }
     }
 
-    void startAviAnim() {
-        if (avi == null) return;
-        if (avi.getVisibility() != View.VISIBLE) avi.setVisibility(View.VISIBLE);
-        avi.show();
-    }
-
-    void stopAviAnim() {
-        if (avi == null) return;
-        avi.hide();
-        avi.setVisibility(View.GONE);
-    }
-
     @Override
     public void onDestroyView() {
         try {
-            stopAviAnim();
+            if (animationDrawable != null) {
+                animationDrawable.stop();
+            }
+
+            if (imageViewLoading != null) {
+                Drawable bg = imageViewLoading.getBackground();
+                if (bg instanceof AnimationDrawable) {
+                    ((AnimationDrawable) bg).stop();
+                }
+                imageViewLoading.setBackground(null);
+            }
+
         } catch (Exception e) {
             logger.error("MemberCardWaitFragment onDestroyView error : {}", e.getMessage());
         }

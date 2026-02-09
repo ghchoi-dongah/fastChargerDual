@@ -65,7 +65,7 @@
     <string name="btnConfigSave">저장</string>
     <string name="btnConfigExit">나가기</string>
     <string name="btnPowerOff">Reboot</string>
-    <string name="plugWaite"><font color="#2E4298">충전</font> 준비 중입니다.\n 잠시만 기다려 주세요.</string>
+    <string name="plugWaite"><font color="#000000">충전 준비 중입니다.\n잠시만 기다려 주세요.</font></string>
     <string name="channelSelect"> [ 채널 선택] </string>
     <string name="channel1"> 1번 채널 </string>
     <string name="channel2"> 2번 채널 </string>
@@ -135,7 +135,7 @@
     <string name="chargeUnitFormat">충전단가: %1$s 원</string>
 
     <string name="qrMessage">간편 QR 결제</string>
-    <string name="qrInfoMessage">QR코드를 스캔하여\n충전이 가능합니다.</string>
+    <string name="qrInfoMessage">QR코드를 스캔하여 충전이\n가능합니다.</string>
     <string name="memberMessage">회원 충전</string>
     <string name="memberInfoMessage">회원카드를 태그하여\n간편하게 충전이 가능합니다.</string>
     <string name="memChargingUnit">충전단가:</string>
@@ -151,7 +151,7 @@
     <string name="memberCardTaggingMessage">회원카드 태깅</string>
     <string name="memberWaitingMessage">회원 확인 중</string>
     <string name="creditCardTaggingMessage">신용 카드 결제</string>
-    <string name="creditCardTaggingSubMessage">선결제로 진행되며, 충전 후 사용한 금액만큼 최종 결제됩니다.\n나머지 금액은 자동 취소됩니다.</string>
+    <string name="creditCardTaggingSubMessage">선결제로 진행되며,\n충전 후 사용한 금액만큼 최종 결제됩니다.\n나머지 금액은 자동 취소됩니다.</string>
     <string name="creditCardWaitingMessage">결제카드를 리더기에 삽입하여 주세요.\n 결제 진행 중입니다. 잠시만 기다려 주세요.</string>
     <string name="errorMessage">SYSTEM ERROR MESSAGE</string>
     <string name="plugWaitMessage">차량에 <font color='#2E4298'>커넥터</font>를 연결 주세요</string>
@@ -175,6 +175,7 @@
     <string name="etcInfo">기타정보</string>
     <string name="limitSoc">최대 충전량: </string>
     <string name="chargeInfo">충전정보</string>
+    <string name="payInfo">결제정보</string>
     <string name="connectorDisconnectMessage"><font color="#FF000000">커넥터를 분리하여 정리해 주세요.</font></string>
     <string name="EVCheckMessage">차량과 통신 확인 중</string>
 

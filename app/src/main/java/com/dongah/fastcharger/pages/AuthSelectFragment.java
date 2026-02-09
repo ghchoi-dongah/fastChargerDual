@@ -154,7 +154,7 @@ public class AuthSelectFragment extends Fragment implements View.OnClickListener
                 BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                 Connector connector = ((MainActivity) MainActivity.mContext).getConnectorList().get(mChannel);
                 String qrCodeUrl = connector.getQrUrl();
-                Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeUrl, BarcodeFormat.QR_CODE, 150, 150);
+                Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeUrl, BarcodeFormat.QR_CODE, 120, 120);
                 imageViewQr.setImageBitmap(toGrayscale(bitmap));
             }
         } catch (Exception e) {

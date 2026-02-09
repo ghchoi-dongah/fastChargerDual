@@ -6,6 +6,13 @@
     android:layout_height="652dp"
     tools:context=".pages.FaultFragment">
 
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:background="@drawable/layer_list_rect" />
+
     <TextView
         android:id="@+id/txtFaultTitle"
         android:layout_width="wrap_content"

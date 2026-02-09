@@ -1,6 +1,8 @@
 package com.dongah.fastcharger.pages;
 
 import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -49,8 +52,9 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
 
     View view;
     TextView txtMessage;
+    ImageView imageViewLoading;
+    AnimationDrawable animationDrawable;
     Button btnCancel, btnConfirm;
-    AVLoadingIndicatorView avi;
 
     public MessageYesNoFragment() {
         // Required empty public constructor
@@ -93,7 +97,9 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
         btnCancel.setOnClickListener(this);
         btnConfirm = view.findViewById(R.id.btnConfirm);
         btnConfirm.setOnClickListener(this);
-        avi = view.findViewById(R.id.avi);
+        imageViewLoading = view.findViewById(R.id.imageViewLoading);
+        imageViewLoading.setBackgroundResource(R.drawable.ani_loading);
+        animationDrawable = (AnimationDrawable) imageViewLoading.getBackground();
         return view;
     }
 
@@ -117,7 +123,7 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
         try {
             if (Objects.equals(getId, R.id.btnCancel)) {
                 ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CHARGING);
-                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", "small");
+                ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CHARGING, "CHARGING", null);
             } else if (Objects.equals(getId, R.id.btnConfirm)) {
                 ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel).setUserStop(true);
                 ((MainActivity) MainActivity.mContext).getControlBoard().getTxData(mChannel).setStop(true);
@@ -125,30 +131,28 @@ public class MessageYesNoFragment extends Fragment implements View.OnClickListen
                 txtMessage.setText(R.string.stoppingMessage);
                 btnConfirm.setVisibility(View.INVISIBLE);
                 btnCancel.setVisibility(View.INVISIBLE);
-                avi.setVisibility(View.VISIBLE);
-                startAviAnim();
+                imageViewLoading.setVisibility(View.VISIBLE);
+                animationDrawable.start();
             }
         } catch (Exception e) {
             logger.error("MessageYesNoFragment  onClick : {} ", e.getMessage());
         }
     }
 
-    void startAviAnim() {
-        if (avi == null) return;
-        if (avi.getVisibility() != View.VISIBLE) avi.setVisibility(View.VISIBLE);
-        avi.show();
-    }
-
-    void stopAviAnim() {
-        if (avi == null) return;
-        avi.hide();
-        avi.setVisibility(View.GONE);
-    }
-
     @Override
     public void onDestroyView() {
         try {
-            stopAviAnim();
+            if (animationDrawable != null) {
+                animationDrawable.stop();
+            }
+
+            if (imageViewLoading != null) {
+                Drawable bg = imageViewLoading.getBackground();
+                if (bg instanceof AnimationDrawable) {
+                    ((AnimationDrawable) bg).stop();
+                }
+                imageViewLoading.setBackground(null);
+            }
         } catch (Exception e) {
             logger.error("MessageYesNoFragment onDestroyView error : {}", e.getMessage());
         }

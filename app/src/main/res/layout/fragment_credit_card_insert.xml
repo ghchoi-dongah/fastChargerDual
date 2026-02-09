@@ -79,6 +79,7 @@
         app:layout_constraintTop_toTopOf="@id/txtInputAmt" />
 
     <View
+        android:id="@id/viewLine"
         android:layout_width="260dp"
         android:layout_height="1.5dp"
         android:layout_centerInParent="true"
@@ -87,13 +88,26 @@
         app:layout_constraintTop_toBottomOf="@id/txtInputAmt" />
 
     <ImageView
+        android:id="@+id/imageViewCreditCardBackground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/card_to_reader_background"
+        app:layout_constraintTop_toBottomOf="@id/viewLine"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="contentDescription" />
+
+    <ImageView
         android:id="@+id/creditInsert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/credit_card_insert01"
-        android:layout_marginTop="60dp"
-        app:layout_constraintRight_toRightOf="@id/won"
-        app:layout_constraintTop_toBottomOf="@id/txtInputAmt" />
+        android:background="@drawable/creditcardtagging"
+        app:layout_constraintTop_toTopOf="@id/imageViewCreditCardBackground"
+        app:layout_constraintStart_toStartOf="@id/imageViewCreditCardBackground"
+        app:layout_constraintEnd_toEndOf="@id/imageViewCreditCardBackground"
+        app:layout_constraintBottom_toBottomOf="@id/imageViewCreditCardBackground"
+        tools:ignore="contentDescription" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

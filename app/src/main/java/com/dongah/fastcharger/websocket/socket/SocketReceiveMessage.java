@@ -430,7 +430,7 @@ public class SocketReceiveMessage extends JSONCommunicator implements SocketInte
                                             ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getChannel(), UiSeq.CHARGING_STOP_MESSAGE, "CHARGING_STOP_MESSAGE", null);
                                         } else {
                                             ((MainActivity) MainActivity.mContext).getClassUiProcess(getChannel()).setUiSeq(UiSeq.CHARGING);
-                                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "small");
+                                            ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", null);
                                         }
                                     } else {
                                         chargingCurrentData.setParentIdTag(parentIdTag);
@@ -470,7 +470,7 @@ public class SocketReceiveMessage extends JSONCommunicator implements SocketInte
                                     String certificationReason = status.name();
                                     if (Objects.equals(uiSeq, UiSeq.CHARGING)) {
                                         ((MainActivity) MainActivity.mContext).getClassUiProcess(getChannel()).setUiSeq(UiSeq.CHARGING);
-                                        fragmentChange.onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", "small");
+                                        fragmentChange.onFragmentChange(getChannel(), UiSeq.CHARGING, "CHARGING", null);
                                         getToastPositionMake().onShowToast(getChannel(), "충전 중지 인증 실패 : " + certificationReason);
                                     } else {
                                         ((MainActivity) MainActivity.mContext).getChargingCurrentData(getChannel()).setAuthorizeResult(false);

@@ -105,7 +105,7 @@ public class CreditCardInsertFragment extends Fragment implements View.OnClickLi
         txtInputAmt = view.findViewById(R.id.txtInputAmt);
         txtInputAmt.setText(payFormatter.format(chargingCurrentData.getPrePayment()));
         creditInsert = view.findViewById(R.id.creditInsert);
-        creditInsert.setBackgroundResource(R.drawable.ani_credit_wait);
+        creditInsert.setBackgroundResource(R.drawable.creditcardtagging);
         animationDrawable = (AnimationDrawable) creditInsert.getBackground();
         animationDrawable.start();
         creditInsert.setOnClickListener(this);

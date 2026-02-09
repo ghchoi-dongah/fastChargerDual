@@ -170,7 +170,7 @@ public class ChargingFragment extends Fragment {
                                 cnt++;
                                 if (Objects.equals(cnt,10)){
                                     ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CHARGING);
-                                    ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel, UiSeq.CHARGING, "UiSeq.CHARGING", "small");
+                                    ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel, UiSeq.CHARGING, "CHARGING", null);
                                 } else {
                                     textViewTimer.setText(String.valueOf(10 - cnt) + getString(R.string.screenChangeMessage));
                                     displayHandler.postDelayed(displayRunnable, 1000);

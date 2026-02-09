@@ -243,21 +243,33 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onDestroyView() {
         try {
-            animBlink.cancel();
-            animBlink = null;
-
-            if (qrHandler != null) {
-                qrHandler.removeCallbacksAndMessages(null);
-                qrHandler.removeMessages(0);
-            }
             // back image
             requestStrings[0] = String.valueOf(mChannel);
             sharedModel.setMutableLiveData(requestStrings);
         } catch (Exception e) {
+            logger.error("InitFragment onDestroyView error : {}", e.getMessage());
+        }
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDetach() {
+        try {
+            if (animBlink != null) {
+                animBlink.cancel();
+                animBlink = null;
+            }
+
+            if (qrHandler != null) {
+                qrHandler.removeCallbacksAndMessages(null);
+                qrHandler = null;
+            }
+        } catch (Exception e) {
             logger.error("InitFragment onDetach error : {}", e.getMessage());
+        } finally {
+            super.onDetach();
         }
     }
 

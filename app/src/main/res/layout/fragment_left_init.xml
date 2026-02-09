@@ -7,7 +7,6 @@
     android:layout_height="652dp"
     tools:context=".pages.LeftInitFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <FrameLayout
         android:id="@+id/leftConnector"
         android:layout_width="430dp"
@@ -51,7 +50,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginStart="40dp"
-                android:background="@drawable/qr_code"
+                android:background="@drawable/qr"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="@id/textViewLeftConnector"
                 tools:ignore="contentDescription" />

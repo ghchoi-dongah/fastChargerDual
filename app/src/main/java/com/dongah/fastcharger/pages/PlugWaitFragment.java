@@ -1,6 +1,7 @@
 package com.dongah.fastcharger.pages;
 
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,7 +56,8 @@ public class PlugWaitFragment extends Fragment {
 
     int cnt = 0;
     TextView txtMessage;
-    AVLoadingIndicatorView avi;
+    ImageView imageViewLoading;
+    AnimationDrawable animationDrawable;
 
     RxData rxData;
     Handler countHandler;
@@ -102,7 +104,9 @@ public class PlugWaitFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_plug_wait, container, false);
         txtMessage = view.findViewById(R.id.txtMessage);
-        avi = view.findViewById(R.id.avi);
+        imageViewLoading = view.findViewById(R.id.imageViewLoading);
+        imageViewLoading.setBackgroundResource(R.drawable.ani_loading);
+        animationDrawable = (AnimationDrawable) imageViewLoading.getBackground();
         chargerConfiguration = ((MainActivity) MainActivity.mContext).getChargerConfiguration();
         chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
         return view;
@@ -113,7 +117,7 @@ public class PlugWaitFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         try {
-            startAviAnim();
+            animationDrawable.start();
             cnt = 0;
             rxData = ((MainActivity) getActivity()).getControlBoard().getRxData(mChannel);
             sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
@@ -182,22 +186,20 @@ public class PlugWaitFragment extends Fragment {
         }
     }
 
-    void startAviAnim() {
-        if (avi == null) return;
-        if (avi.getVisibility() != View.VISIBLE) avi.setVisibility(View.VISIBLE);
-        avi.show();
-    }
-
-    void stopAviAnim() {
-        if (avi == null) return;
-        avi.hide();
-        avi.setVisibility(View.GONE);
-    }
-
     @Override
     public void onDestroyView() {
         try {
-            stopAviAnim();
+            if (animationDrawable != null) {
+                animationDrawable.stop();
+            }
+
+            if (imageViewLoading != null) {
+                Drawable bg = imageViewLoading.getBackground();
+                if (bg instanceof AnimationDrawable) {
+                    ((AnimationDrawable) bg).stop();
+                }
+                imageViewLoading.setBackground(null);
+            }
 
             if (countHandler != null) {
                 countHandler.removeCallbacksAndMessages(null);
@@ -216,11 +218,6 @@ public class PlugWaitFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         try {
-//            if (countHandler != null) {
-//                countHandler.removeCallbacks(countRunnable);
-//                countHandler.removeCallbacksAndMessages(null);
-//                countHandler.removeMessages(0);
-//            }
             if (countHandler != null) {
                 countHandler.removeCallbacksAndMessages(null);
                 countHandler = null;

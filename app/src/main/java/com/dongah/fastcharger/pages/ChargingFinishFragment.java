@@ -99,7 +99,6 @@ public class ChargingFinishFragment extends Fragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_charging_finish, container, false);
         txtSoc = view.findViewById(R.id.txtSoc);
         txtAmountOfCharge = view.findViewById(R.id.txtAmountOfCharge);

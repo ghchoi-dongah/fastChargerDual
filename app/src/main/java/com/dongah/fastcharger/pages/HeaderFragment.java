@@ -2,6 +2,7 @@ package com.dongah.fastcharger.pages;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,6 +95,7 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
         btnLogo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("HeaderFragment", "btnLogo clickedCnt: " + clickedCnt);
                 if (clickedCnt > 8) {
                     try {
                         boolean chkUiSeq = ((MainActivity) MainActivity.mContext).getClassUiProcess(0).getUiSeq() == UiSeq.INIT &&
