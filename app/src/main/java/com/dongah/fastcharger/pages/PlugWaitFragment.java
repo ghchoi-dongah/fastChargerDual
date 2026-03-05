@@ -169,7 +169,7 @@ public class PlugWaitFragment extends Fragment {
 
                             //connecting wait
                             if (rxData.isCsPilot()) {
-                                cnt = 0;
+                                Log.d("PlugWaitFragment", "ClassUiSeq: " + ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).getUiSeq());
                                 if (txtMessage.getTag() == null || !(boolean) txtMessage.getTag()) {
                                     txtMessage.setText(R.string.EVCheckMessage);
                                     txtMessage.setTag(true);
