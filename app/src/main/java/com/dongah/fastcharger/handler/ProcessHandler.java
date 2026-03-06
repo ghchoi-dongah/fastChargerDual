@@ -829,6 +829,7 @@ public class ProcessHandler extends Handler {
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void onHeartBeatStart(int delay) {
+        onHeartBeatStop();
         if (heartbeatThread == null || heartbeatThread.getState() != Thread.State.RUNNABLE) {
             heartbeatThread = new HeartbeatThread(delay);
             heartbeatThread.setStopped(false);

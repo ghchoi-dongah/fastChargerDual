@@ -200,9 +200,19 @@ public class AuthSelectFragment extends Fragment implements View.OnClickListener
                 ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.MEMBER_CARD);
                 ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.MEMBER_CARD, "MEMBER_CARD", null);
             } else if (Objects.equals(getId, R.id.viewNoMember)) {
+                GlobalVariables.setCustomUnitPriceReq(false);
                 GlobalVariables.setHumaxUserType("B");
                 chargingCurrentData.setPaymentType(PaymentType.CREDIT);
                 chargingCurrentData.setPowerUnitPrice(bUnitPrice);
+                ((MainActivity) MainActivity.mContext).getProcessHandler()
+                        .sendMessage(socketReceiveMessage.onMakeHandlerMessage(
+                                GlobalVariables.MESSAGE_CUSTOM_UNIT_PRICE,
+                                chargingCurrentData.getConnectorId(),
+                                0,
+                                "",
+                                null,
+                                GlobalVariables.getHumaxUserType(),
+                                false));
                 ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.CREDIT_CARD);
                 ((MainActivity) MainActivity.mContext).getFragmentChange().onFragmentChange(mChannel,UiSeq.CREDIT_CARD, "CREDIT_CARD", null);
             } else if (Objects.equals(getId, R.id.viewQr)) {
