@@ -179,6 +179,10 @@ public class ClassUiProcess implements TLS3800Listener {
                     }
                     //MeterValue Stop
                     onMeterValueStop();
+                    // soc
+                    if (chargerConfiguration.getTargetSoc() == 0) {
+                        chargerConfiguration.setTargetSoc(100);
+                    }
                     break;
                 case REBOOTING:
                     if (!(getCurrentFragment() instanceof FaultFragment)) {
@@ -285,7 +289,8 @@ public class ClassUiProcess implements TLS3800Listener {
                                 }
                             }
                         } else {
-                            if (rxData.isCsStop() || !rxData.isCsPilot() || chargingCurrentData.isUserStop() || rxData.getSoc() >= chargerConfiguration.getTargetSoc()) {
+                            if (rxData.isCsStop() || !rxData.isCsPilot() || chargingCurrentData.isUserStop() ||
+                                    (rxData.getSoc() >= chargerConfiguration.getTargetSoc() && chargerConfiguration.getTargetSoc() != 0)) {
 //                                    (chargingCurrentData.getHmChargingLimitFee() <= chargingCurrentData.getPowerMeterUsePay())) {
                                 controlBoard.getTxData(getCh()).setStop(true);
                                 controlBoard.getTxData(getCh()).setStart(false);

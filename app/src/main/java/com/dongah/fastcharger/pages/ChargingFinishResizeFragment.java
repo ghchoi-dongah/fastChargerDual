@@ -156,7 +156,7 @@ public class ChargingFinishResizeFragment extends Fragment implements View.OnCli
                 @SuppressLint("SetTextI18n")
                 @Override
                 public void run() {
-                    txtSoc.setText(chargingCurrentData.getSoc() == 0 ? "미지원" : chargingCurrentData.getSoc() + " %");
+                    txtSoc.setText(chargingCurrentData.getSoc() == 0 ? "미지원" : chargingCurrentData.getSoc() + "%");
                     txtAmountOfCharge.setText(powerFormatter.format(chargingCurrentData.getPowerMeterUse() * 0.01) + " kWh");
                     realPay = (int) chargingCurrentData.getPowerMeterUsePay();
                     txtChargePay.setText(payFormatter.format(realPay) + " 원");
