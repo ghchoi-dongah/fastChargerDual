@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
@@ -23,7 +22,6 @@ import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.ClassUiProcess;
 import com.dongah.fastcharger.basefunction.PaymentType;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 import com.dongah.fastcharger.websocket.ocpp.utilities.ZonedDateTimeConvert;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
@@ -61,8 +59,7 @@ public class ChargingFragment extends Fragment {
     CardView cardViewPayment;
     Handler uiUpdateHandler;
     double powerUnitPrice = 0f;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
+
     ClassUiProcess classUiProcess;
     Date startTime = null, useTime = null;
     DecimalFormat payFormatter = new DecimalFormat("#,###,##0");
@@ -147,9 +144,6 @@ public class ChargingFragment extends Fragment {
             mediaPlayer.start();
 
             progressCircular.isIndeterminate();
-            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
 
             if (Objects.equals(chargingCurrentData.getPaymentType(), PaymentType.CREDIT)) {
                 cardViewPayment.setVisibility(View.VISIBLE);
@@ -260,8 +254,6 @@ public class ChargingFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         try {
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
             uiUpdateHandler.removeCallbacksAndMessages(null);
             uiUpdateHandler.removeMessages(0);
             if (uiUpdateHandler != null) uiUpdateHandler = null;

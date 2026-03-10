@@ -10,13 +10,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.GlobalVariables;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +42,6 @@ public class EnvironmentFragment extends Fragment implements View.OnClickListene
     private int mChannel;
 
     Button btnConfig, btnWebSocket, btnControl, btnUi, btnMember, btnExit, btnLoadTest;
-
-    SharedModel sharedModel ;
-    String[] requestStrings = new String[1];
 
     public EnvironmentFragment() {
         // Required empty public constructor
@@ -98,7 +93,6 @@ public class EnvironmentFragment extends Fragment implements View.OnClickListene
         btnMember.setOnClickListener(this);
         btnExit = view.findViewById(R.id.btnExit);
         btnExit.setOnClickListener(this);
-        sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
         return view;
     }
 

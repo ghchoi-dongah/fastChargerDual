@@ -78,7 +78,6 @@ public class SmsFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sms, container, false);
         txtInputAmt = view.findViewById(R.id.txtInputAmt);
         btnNum0 = view.findViewById(R.id.btnNum0);

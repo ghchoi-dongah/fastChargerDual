@@ -237,8 +237,6 @@ public class ChargingFinishFragment extends Fragment implements View.OnClickList
     @Override
     public void onDetach() {
         super.onDetach();
-//        requestStrings[0] = String.valueOf(mChannel);
-//        sharedModel.setMutableLiveData(requestStrings);
         uiCheckHandler.removeCallbacksAndMessages(null);
         uiCheckHandler.removeMessages(0);
     }

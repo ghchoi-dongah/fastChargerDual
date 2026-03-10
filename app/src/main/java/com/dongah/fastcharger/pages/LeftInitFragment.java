@@ -154,10 +154,6 @@ public class LeftInitFragment extends Fragment implements View.OnClickListener {
                 Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeURL, BarcodeFormat.QR_CODE, 600, 600);
                 btnQr.setImageBitmap(toGrayscale(bitmap));
             }
-            String[] requestStrings = new String[1];
-            SharedModel sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
         } catch (Exception e) {
             logger.error("QrCode : {}", e.getMessage());
         }

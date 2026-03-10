@@ -19,8 +19,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,8 +59,6 @@ public class ConfigSettingFragment extends Fragment implements View.OnClickListe
     private String mParam2;
 
     ChargerConfiguration chargerConfiguration;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
     InputMethodManager imm;
     Spinner spChargerType, spChargerModel, spPayMode, spMode;
     int spPosition = 0, spChargerModelCode = 0, spPayModePos = 0, spModePos = 0;
@@ -220,7 +216,6 @@ public class ConfigSettingFragment extends Fragment implements View.OnClickListe
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
     }
 
 

@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 
 import java.util.Objects;
 
@@ -43,8 +42,6 @@ public class ConnectCheckFragment extends Fragment implements View.OnClickListen
     TextView txtMessage;
     AnimationDrawable animationDrawableBackground;
     Handler uiCheckHandler;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
 
     public ConnectCheckFragment() {
         // Required empty public constructor

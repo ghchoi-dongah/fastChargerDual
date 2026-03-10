@@ -62,8 +62,6 @@ public class PlugWaitFragment extends Fragment {
     RxData rxData;
     Handler countHandler;
     Runnable countRunnable;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
     ChargerConfiguration chargerConfiguration;
     ChargingCurrentData chargingCurrentData;
 
@@ -120,9 +118,6 @@ public class PlugWaitFragment extends Fragment {
             animationDrawable.start();
             cnt = 0;
             rxData = ((MainActivity) getActivity()).getControlBoard().getRxData(mChannel);
-            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
 
             MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.plugwait);
             mediaPlayer.setOnCompletionListener(MediaPlayer::release);

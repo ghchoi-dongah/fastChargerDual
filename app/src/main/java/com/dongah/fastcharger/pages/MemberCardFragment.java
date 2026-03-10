@@ -165,16 +165,12 @@ public class MemberCardFragment extends Fragment {
                 imgMemberCardTagging.setBackground(null);
             }
 
-//            ((AnimationDrawable) imgMemberCardTagging.getBackground()).stop();
-//            imgMemberCardTagging.setBackground(null);
-
             if (countHandler != null) {
                 countHandler.removeCallbacksAndMessages(null);
                 countHandler = null;
             }
             countRunnable = null;
 
-//            countHandler.removeCallbacksAndMessages(null);
         } catch (Exception e) {
             Log.e("MemberCardFragment", "onDestroyView error", e);
             logger.error("MemberCardFragment onDestroyView error : {}", e.getMessage());
@@ -186,12 +182,6 @@ public class MemberCardFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         try {
-//            if (countHandler != null) {
-//                countHandler.removeCallbacks(countRunnable);
-//                countHandler.removeCallbacksAndMessages(null);
-//                countHandler.removeMessages(0);
-//            }
-
             if (countHandler != null) {
                 countHandler.removeCallbacksAndMessages(null);
                 countHandler = null;

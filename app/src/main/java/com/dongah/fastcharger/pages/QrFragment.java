@@ -158,6 +158,5 @@ public class QrFragment extends Fragment {
         // back image
         requestStrings[0] = String.valueOf(mChannel);
         sharedModel.setMutableLiveData(requestStrings);
-
     }
 }

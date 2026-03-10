@@ -14,20 +14,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.ChargerConfiguration;
 import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.ClassUiProcess;
-import com.dongah.fastcharger.basefunction.GlobalVariables;
 import com.dongah.fastcharger.basefunction.PaymentType;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.FileManagement;
-import com.dongah.fastcharger.utils.SharedModel;
 import com.dongah.fastcharger.websocket.ocpp.utilities.ZonedDateTimeConvert;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
@@ -67,8 +62,6 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
     TextView txtOutVoltage, txtOutCurrent, txtOutPower;
     Handler uiUpdateHandler;
     double powerUnitPrice = 0f;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
     ClassUiProcess classUiProcess;
     ChargingCurrentData chargingCurrentData;
     Date startTime = null, useTime = null;
@@ -148,9 +141,6 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
             mediaPlayer.start();
 
             progressCircular.isIndeterminate();
-            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
 
             if (Objects.equals(chargingCurrentData.getPaymentType(), PaymentType.CREDIT)) {
                 textViewPrePayment.setVisibility(View.VISIBLE);
@@ -277,8 +267,6 @@ public class ChargingResizeFragment extends Fragment implements View.OnClickList
     public void onDetach() {
         super.onDetach();
         try {
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
             uiUpdateHandler.removeCallbacksAndMessages(null);
             uiUpdateHandler.removeMessages(0);
             //display handler

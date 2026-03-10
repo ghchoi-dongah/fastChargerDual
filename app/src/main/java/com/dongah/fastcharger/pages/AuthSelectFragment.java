@@ -13,7 +13,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,7 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
@@ -30,7 +28,6 @@ import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.GlobalVariables;
 import com.dongah.fastcharger.basefunction.PaymentType;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 import com.dongah.fastcharger.websocket.ocpp.utilities.ZonedDateTimeConvert;
 import com.dongah.fastcharger.websocket.socket.Connector;
 import com.dongah.fastcharger.websocket.socket.SocketReceiveMessage;
@@ -81,8 +78,6 @@ public class AuthSelectFragment extends Fragment implements View.OnClickListener
     ChargingCurrentData chargingCurrentData;
     Handler uiCheckHandler;
     SocketReceiveMessage socketReceiveMessage;
-    String[] requestStrings = new String[1];
-    SharedModel sharedModel;
 
     double aUnitPrice, bUnitPrice;
 
@@ -127,7 +122,6 @@ public class AuthSelectFragment extends Fragment implements View.OnClickListener
         chargerConfiguration = ((MainActivity) MainActivity.mContext).getChargerConfiguration();
         chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
         socketReceiveMessage = ((MainActivity) MainActivity.mContext).getSocketReceiveMessage();
-        sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
 
         textViewMemberUnitInput = view.findViewById(R.id.textViewMemberUnitInput);
         textViewNoMemberUnitInput = view.findViewById(R.id.textViewNoMemberUnitInput);
@@ -169,9 +163,6 @@ public class AuthSelectFragment extends Fragment implements View.OnClickListener
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         try {
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
-
             MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.authselect);
             mediaPlayer.setOnCompletionListener(MediaPlayer::release);
             mediaPlayer.start();

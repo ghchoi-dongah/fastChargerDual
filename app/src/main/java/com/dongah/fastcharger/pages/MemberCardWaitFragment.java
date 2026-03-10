@@ -1,18 +1,14 @@
 package com.dongah.fastcharger.pages;
 
-import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +29,6 @@ import com.dongah.fastcharger.websocket.ocpp.core.ChargePointStatus;
 import com.dongah.fastcharger.websocket.ocpp.core.Reason;
 import com.dongah.fastcharger.websocket.socket.SocketReceiveMessage;
 import com.dongah.fastcharger.websocket.socket.SocketState;
-import com.wang.avi.AVLoadingIndicatorView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +143,6 @@ public class MemberCardWaitFragment extends Fragment  {
                                 }
                                 //authorize result check
                                 if (!chargingCurrentData.isAuthorizeResult()) {
-//                                    txtMemberWaiting.setText(getResources().getText(R.string.txtMemberFail));
                                     animationDrawable.stop();
                                 }
                             } catch (Exception e){

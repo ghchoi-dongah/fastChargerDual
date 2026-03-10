@@ -14,14 +14,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.ClassUiProcess;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 
 import java.text.DecimalFormat;
 import java.util.Objects;
@@ -58,8 +56,6 @@ public class CreditCardInsertFragment extends Fragment implements View.OnClickLi
      * 결제 서비스 instance
      */
     Handler paymentHandler;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
     View viewLine;
 
 
@@ -98,7 +94,6 @@ public class CreditCardInsertFragment extends Fragment implements View.OnClickLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_credit_card_insert, container, false);
         classUiProcess = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel);
         chargingCurrentData = ((MainActivity) MainActivity.mContext).getChargingCurrentData(mChannel);
@@ -120,9 +115,6 @@ public class CreditCardInsertFragment extends Fragment implements View.OnClickLi
         MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.mContext, R.raw.creditcardinsert);
         mediaPlayer.setOnCompletionListener(MediaPlayer::release);
         mediaPlayer.start();
-
-        sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-
     }
 
     @Override
@@ -137,8 +129,6 @@ public class CreditCardInsertFragment extends Fragment implements View.OnClickLi
 //        object.cancel();
 //        object = null;
         //image check
-        requestStrings[0] = String.valueOf(mChannel);
-        sharedModel.setMutableLiveData(requestStrings);
     }
 
 

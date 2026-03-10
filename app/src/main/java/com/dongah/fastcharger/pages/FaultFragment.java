@@ -51,8 +51,6 @@ public class FaultFragment extends Fragment {
     TextView txtFaultMessage, txtFaultTitle;
     Handler faultMessageDisplay, rebootHandler, paymentHandler;
     Runnable faultMessageDisplayRunnable, rebootRunnable;
-    String[] requestStrings = new String[1];
-    SharedModel sharedModel;
     ChargingCurrentData chargingCurrentData;
     String messageContext;
 

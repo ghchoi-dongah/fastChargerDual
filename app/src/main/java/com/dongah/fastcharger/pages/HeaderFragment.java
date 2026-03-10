@@ -12,14 +12,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
 import com.dongah.fastcharger.basefunction.ChargerConfiguration;
+import com.dongah.fastcharger.basefunction.GlobalVariables;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +48,6 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
     TextView textViewChargerId;
     ImageButton btnHome, btnLogo;
     ChargerConfiguration chargerConfiguration;
-    SharedModel sharedModel;
 
     public HeaderFragment() {
         // Required empty public constructor
@@ -128,34 +125,6 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        try {
-            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            sharedModel.getLiveData().observe(getViewLifecycleOwner(), new Observer<String[]>() {
-                @Override
-                public void onChanged(String[] strings) {
-                    mChannel = Integer.parseInt(strings[0]);
-                    UiSeq uiSeq = ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).getUiSeq();
-                    switch (uiSeq) {
-                        case MEMBER_CARD_WAIT:
-                        case CREDIT_CARD_WAIT:
-                        case CHARGING:
-                        case PLUG_CHECK:
-                        case CONNECT_CHECK:
-                        case FAULT:
-                        case REBOOTING:
-                        case ADMIN_PASS:
-                        case ENVIRONMENT:
-                            btnHome.setVisibility(View.INVISIBLE);
-                            break;
-                        default:
-                            btnHome.setVisibility(View.VISIBLE);
-                            break;
-                    }
-                }
-            });
-        } catch (Exception e) {
-            logger.error("HeaderFragment onViewCreated : {}", e.getMessage());
-        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -164,9 +133,13 @@ public class HeaderFragment extends Fragment implements View.OnClickListener {
         int getId = v.getId();
 
         if (Objects.equals(getId, R.id.btnHome))  {
-            // initialize process
-            ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).setUiSeq(UiSeq.INIT);
-            ((MainActivity) MainActivity.mContext).getClassUiProcess(mChannel).onHome();
+            for (int i = 0; i < GlobalVariables.maxChannel; i++) {
+                UiSeq uiSeq = ((MainActivity) MainActivity.mContext).getClassUiProcess(i).getUiSeq();
+                if (uiSeq.getValue() < 7) {
+                    ((MainActivity) MainActivity.mContext).getClassUiProcess(i).setUiSeq(UiSeq.INIT);
+                    ((MainActivity) MainActivity.mContext).getClassUiProcess(i).onHome();
+                }
+            }
         }
     }
     @Override

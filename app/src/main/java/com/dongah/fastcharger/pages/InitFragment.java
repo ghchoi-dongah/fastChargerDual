@@ -1,15 +1,9 @@
 package com.dongah.fastcharger.pages;
 
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.dongah.fastcharger.MainActivity;
 import com.dongah.fastcharger.R;
@@ -33,11 +25,8 @@ import com.dongah.fastcharger.basefunction.ChargerPointType;
 import com.dongah.fastcharger.basefunction.ChargingCurrentData;
 import com.dongah.fastcharger.basefunction.GlobalVariables;
 import com.dongah.fastcharger.basefunction.UiSeq;
-import com.dongah.fastcharger.utils.SharedModel;
 import com.dongah.fastcharger.websocket.ocpp.utilities.ZonedDateTimeConvert;
 import com.dongah.fastcharger.websocket.socket.SocketState;
-import com.google.zxing.BarcodeFormat;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -82,8 +71,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
     ImageView imageViewCar;
     ChargerConfiguration chargerConfiguration;
     ChargingCurrentData chargingCurrentData;
-    SharedModel sharedModel;
-    String[] requestStrings = new String[1];
     Handler qrHandler;
 
     public InitFragment() {
@@ -160,36 +147,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
             chargingCurrentData = ((MainActivity) getActivity()).getChargingCurrentData(mChannel);
             txtMemberUnitInput.setText(getString(R.string.chargeUnitFormat, String.valueOf(unitPrices.getOrDefault("A", 0))));
             chargingCurrentData.setPowerUnitPrice(Double.parseDouble(String.valueOf(unitPrices.getOrDefault("A", 0))));
-
-
-            sharedModel = new ViewModelProvider(requireActivity()).get(SharedModel.class);
-            sharedModel.getLiveData().observe(getViewLifecycleOwner(), new Observer<String[]>() {
-                @Override
-                public void onChanged(String[] strings) {
-                    // UiSeq = MEMBER_CARD(4), MEMBER_CARD_WAIT(5), CREDIT_CARD(6), CREDIT_CARD_WAIT(7) 일때
-                    try {
-                        int otherChannel = Integer.parseInt(strings[0]);
-                        UiSeq otherUiSeq = ((MainActivity) getActivity()).getClassUiProcess(otherChannel).getUiSeq();
-                        switch (otherUiSeq) {
-                            case MEMBER_CARD:
-                            case MEMBER_CARD_WAIT:
-                            case CREDIT_CARD:
-                            case CREDIT_CARD_WAIT:
-//                                imageCheck.setVisibility(View.VISIBLE);
-//                                btnQr.setVisibility(View.INVISIBLE);
-//                                txtInitMessage.setVisibility(View.INVISIBLE);
-                                break;
-                            default:
-//                                imageCheck.setVisibility(View.INVISIBLE);
-//                                btnQr.setVisibility(View.VISIBLE);
-//                                txtInitMessage.setVisibility(View.VISIBLE);
-                                break;
-                        }
-                    } catch (Exception e) {
-                        logger.error("img check error {} : ", e.getMessage());
-                    }
-                }
-            });
         } catch (Exception e) {
             logger.error("InitFragment onViewCreated : {}", e.getMessage());
         }
@@ -244,13 +201,6 @@ public class InitFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onDestroyView() {
-        try {
-            // back image
-            requestStrings[0] = String.valueOf(mChannel);
-            sharedModel.setMutableLiveData(requestStrings);
-        } catch (Exception e) {
-            logger.error("InitFragment onDestroyView error : {}", e.getMessage());
-        }
         super.onDestroyView();
     }
 
